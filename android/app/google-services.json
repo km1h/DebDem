@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "953821362590",
+    "project_id": "debdem-a9800",
+    "storage_bucket": "debdem-a9800.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:953821362590:android:0f79e17796298c6835be8f",
+        "android_client_info": {
+          "package_name": "com.debdem"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA11Lr5XTCC8T-NS-GGcIJ1YCLXO-otq3E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
