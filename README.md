@@ -2,6 +2,11 @@
 - About environment:
   - make sure to do `npm install`
 
+  # Firebase
+  - run `npm install --save @react-native-firebase/app`
+  
+
+
 ## Developing in a simulator:
 - Install the React Native CLI: `npm install -g react-native-cli`
 - Open Xcode and open a simulator
