@@ -22,6 +22,10 @@ DerivedData
 *.xcuserstate
 **/.xcode.env.local
 
+# TODO (SullivanC19) push or no?
+.xcworkspace
+xcshareddata
+
 # Android/IntelliJ
 #
 build/
