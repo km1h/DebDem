@@ -30,7 +30,4 @@ def flag_bias (transcript_id):
 
   dataset = load_dataset("newsmediabias/news-bias-full-data")
   print(dataset["train"][0]) 
-
-
-result = flag_profanity(1)
-print (result)
+  # Working on this in a notebook

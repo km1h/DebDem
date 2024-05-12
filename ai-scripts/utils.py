@@ -15,6 +15,13 @@ def load_transcript (id):
       transcript = file.read()
     return transcript
 
+def get_topic (transcript_id):
+    """
+    Get the topic of a transcript
+    """
+    # Unhardcode this later from backend
+    return "Abolishing Greeklife at Stanford"
+
 
 def ask_gpt(messages, model):
     chat_completion = client.chat.completions.create(
