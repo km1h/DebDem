@@ -11,7 +11,7 @@ def load_transcript (id):
     Load the transcripts from the backend
     """
     # TEMPORARY: Load the transcript from a file
-    with open(f"transcripts{id}.txt", "r") as file:
+    with open(f"ai-scripts/dummy-data/transcript{id}.txt", "r") as file:
       transcript = file.read()
     return transcript
 
