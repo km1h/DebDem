@@ -13,10 +13,11 @@ const RoomsPage: React.FC = () => {
 
   const navigation = useNavigation<JoinedRoomsPageNavigationProp>();
 
-  const handleRoomPress = (roomId: number) => {
+  const handleRoomPress = (roomId: number, roomContent: string) => {
     navigation.navigate('JoinedRoomPage', {
       data: {
         roomId: roomId,
+        roomContent: roomContent
       }
     })
   }
@@ -31,7 +32,7 @@ const RoomsPage: React.FC = () => {
       <ScrollView style={styles.scrollContainter}>
 
       {joinedRooms.map((room, index) => (
-          <TouchableOpacity style={styles.roomContainer} key={room.id} onPress={() => handleRoomPress(room.id)}>
+          <TouchableOpacity style={styles.roomContainer} key={room.id} onPress={() => handleRoomPress(room.id, room.content)}>
               <LinearGradient
                 colors={['rgba(239, 198, 155, 0.60)', 'rgba(119, 156, 171, 0.10)', 'rgba(0, 0, 0, 0)']}
                 style={{height: 100, borderRadius: 10, width: '100%', justifyContent: 'space-between'}}

@@ -79,21 +79,23 @@ const WorldPage: React.FC = () => {
         ))}
       </ScrollView>
       <View style={styles.postButtonContainer}>
-        {isPosting && 
-          <TextInput style={styles.postText}
-            value={draft}
-            onChangeText={text => setDraft(text)}
-            placeholder="Write your post here!"
-          />
-        }
-        {isPosting && 
-          <TouchableOpacity onPress={() =>  makePost(draft)} style={styles.submitButton}>
-            <Text style={{fontSize: 20}}> Submit </Text>
+        <View style={{flexDirection: 'row'}}>
+          {isPosting && 
+            <TextInput style={styles.postText}
+              value={draft}
+              onChangeText={text => setDraft(text)}
+              placeholder="Write your post here!"
+            />
+          }
+          {isPosting && 
+            <TouchableOpacity onPress={() =>  makePost(draft)} style={styles.submitButton}>
+              <Text style={{fontSize: 20}}> Submit </Text>
+            </TouchableOpacity>
+          }
+          <TouchableOpacity onPress={() =>  makePostButton()} style={styles.postButton}>
+            <Text style={styles.postButtonLabel}>+</Text>
           </TouchableOpacity>
-        }
-        <TouchableOpacity onPress={() =>  makePostButton()} style={styles.postButton}>
-          <Text style={styles.postButtonLabel}>+</Text>
-        </TouchableOpacity>
+        </View>
       </View>
     </View>
   );
@@ -148,7 +150,6 @@ const styles = StyleSheet.create({
   postButtonContainer: {
     flex: 1,
     alignItems: 'flex-end',
-    justifyContent: 'center',
   },
   postButton: {
     marginRight: 20,

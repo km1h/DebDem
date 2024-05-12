@@ -10,8 +10,10 @@ import LoginPage from './src/pages/LoginPage';
 import JoinedRoomPage from './src/pages/JoinedRoom';
 import NavBar from './src/components/NavBar';
 import { RootStackParamList } from './src/components/NavigationTypes';
+import { LogBox } from "react-native"
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
+LogBox.ignoreAllLogs(true);
 
 function App(): React.JSX.Element {
 

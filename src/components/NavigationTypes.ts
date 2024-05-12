@@ -5,5 +5,6 @@ export type RootStackParamList = {
     ProfilePage: undefined,
     JoinedRoomPage: { data: { 
       roomId: number; 
+      roomContent: string;
     }; };
   };
