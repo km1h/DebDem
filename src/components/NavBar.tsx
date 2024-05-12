@@ -2,7 +2,7 @@ import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import WorldPage from '../pages/WorldPage';
-import RoomsPage from '../pages/RoomsPage';
+import RoomsPage from '../pages/JoinedRoomsPage';
 import ProfilePage from '../pages/ProfilePage';
 
 const Tab = createBottomTabNavigator();
@@ -19,7 +19,9 @@ const NavBar: React.FC = () => {
         tabBarInactiveTintColor: "white",
         tabBarStyle: [
           { 
-            backgroundColor: 'rgba(61, 28, 81, 0.7)',
+            backgroundColor: 'rgba(119, 156, 171, 0.30)',
+            borderTopColor: 'rgba(239, 198, 155, 0.80)',
+            borderTopWidth: 4
           }
         ],
         tabBarIcon: ({ focused, color, size }) => {
@@ -30,16 +32,16 @@ const NavBar: React.FC = () => {
           } else if (route.name === 'Rooms') {
             iconName = focused ? 'Rooms' : 'copy-sharp';
           } else if (route.name === 'Profile') {
-            iconName = focused ? 'Person' : 'person-circle';
+            iconName = focused ? 'Person' : 'add-outline';
           }
 
           return <Ionicons name={iconName ?? 'help'} size={size + 4} color={color} />;
         },
       })}
     >
-      <Tab.Screen name="World" component={WorldPage} />
-      <Tab.Screen name="Rooms" component={RoomsPage} />
-      <Tab.Screen name="Profile" component={ProfilePage} />
+      <Tab.Screen name="World" component={WorldPage} options={{ headerShown: false }}/>
+      <Tab.Screen name="Rooms" component={RoomsPage} options={{ headerShown: false }}/>
+      <Tab.Screen name="Profile" component={ProfilePage} options={{ headerShown: false }}/>
     </Tab.Navigator>
   ) as React.ReactElement;
 };
