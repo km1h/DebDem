@@ -6,28 +6,36 @@ import postsData from '../data/posts.json'
 
 
 const WorldPage: React.FC = () => {
-  const [posts, setPosts] = useState(postsData.posts);
+  const [posts, setPosts] = useState(postsData.posts.sort((a, b) => b.count - a.count));
   const [isPosting, setIsPosting] = useState(false);
   const [draft, setDraft] = useState('');
+  const [hasUpvoted, setHasUpvoted] = useState(false); // TODO: update these from the backend
+  const [hasDownvoted, setHasDownvoted] = useState(false);
 
   const upvote = (postId: number) => {
+    const update = hasUpvoted ? -1 : 1;
     const updatedPosts = posts.map(post => {
       if (post.id === postId) {
-        return {...post, count: post.count + 1 };
+        return {...post, count: post.count + update };
       }
       return post
     });
     setPosts(updatedPosts);
+    setHasUpvoted(!hasUpvoted);
+    setHasDownvoted(false);
   }
 
   const downvote = (postId: number) => {
+    const update = hasDownvoted ? 1 : -1;
     const updatedPosts = posts.map(post => {
       if (post.id === postId) {
-        return { ...post, count: post.count - 1 };
+        return { ...post, count: post.count + update };
       }
       return post
     });
     setPosts(updatedPosts);
+    setHasDownvoted(!hasDownvoted);
+    setHasUpvoted(false);
   }
 
   const makePostButton = () => {
@@ -68,11 +76,11 @@ const WorldPage: React.FC = () => {
               </LinearGradient>
               <View style={styles.interactables}>
                 <TouchableOpacity onPress={() => upvote(post.id)}>
-                    <Text style={{fontSize: 20}}> + </Text>
+                    <Text style={{fontSize: 20, fontWeight: hasUpvoted ? 'bold' : 'normal'}}> + </Text>
                 </TouchableOpacity>
                 <Text> {post.count} </Text>
                 <TouchableOpacity onPress={() => downvote(post.id)}>
-                    <Text style={{fontSize: 30}}> - </Text>
+                    <Text style={{fontSize: 30, fontWeight: hasDownvoted ? 'bold' : 'normal'}}> - </Text>
                 </TouchableOpacity>
               </View>
             </View>
