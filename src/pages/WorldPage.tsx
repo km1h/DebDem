@@ -7,6 +7,8 @@ import postsData from '../data/posts.json'
 
 const WorldPage: React.FC = () => {
   const [posts, setPosts] = useState(postsData.posts);
+  const [isPosting, setIsPosting] = useState(false);
+  const [draft, setDraft] = useState('');
 
   const upvote = (postId: number) => {
     const updatedPosts = posts.map(post => {
@@ -28,6 +30,18 @@ const WorldPage: React.FC = () => {
     setPosts(updatedPosts);
   }
 
+  const makePostButton = () => {
+    setIsPosting(!isPosting);
+  }
+
+  const makePost = (content: string) => {
+    const newPost = {
+      id: posts.length,
+      content: content,
+      count: 0
+    };
+    setPosts([...posts, newPost]);
+  }
   return (
     <View style={styles.container}>
       <View style={styles.titleBox}>
@@ -63,8 +77,24 @@ const WorldPage: React.FC = () => {
               </View>
             </View>
         ))}
-
       </ScrollView>
+      <View style={styles.postButtonContainer}>
+        {isPosting && 
+          <View>
+            <TextInput style={styles.postText}
+              value={draft}
+              onChangeText={text => setDraft(text)}
+              placeholder="Write your post here!"
+            />
+            <TouchableOpacity onPress={() =>  makePost(draft)} style={styles.postButton}>
+              <Text style={{fontSize: 30}}> Submit </Text>
+            </TouchableOpacity>
+        </View>
+        }
+        <TouchableOpacity onPress={() =>  makePostButton()} style={styles.postButton}>
+          <Text style={styles.postButtonLabel}>+</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -115,6 +145,24 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: 50,
   },
+  postButtonContainer: {
+    flex: 1,
+    alignItems: 'flex-end',
+    justifyContent: 'center',
+  },
+  postButton: {
+    marginRight: 20,
+    width: 50, // IDK I'm just guessing here
+    height: 50,
+    borderRadius: 25,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: 'black',
+  },
+  postButtonLabel: {
+    fontSize: 30,
+  }
 });
 
 export default WorldPage;
