@@ -71,7 +71,7 @@ def run_synthesis(transcript_ids, model = "gpt-4"):
     prompts = [
         {
             "role": "system",
-            "content": f"You will be provided with a summary of a discussion about {topic} in addition to the key themes and student quotes related to those themes. Please synthesize them into a {total_length} word summary that captures the essence of the discussion. Include a paragraph for each of the key themes, {', '.join(core_themes)}."
+            "content": f"You will be provided with a summary of a discussion about {topic} in addition to the key themes and student quotes related to those themes. Please synthesize them into a {total_length} word summary that captures the essence of the discussion. Include a paragraph for each of the key themes, {', '.join(core_themes)}, and an additonal direct quote for each theme."
         }, {
             "role": "user",
             "content": overall_summary
