@@ -75,3 +75,11 @@ yarn-error.log
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+
+# dotenv environment variables file
+secrets.env
+
+# PyCache Shit
+*pycache*/
+**/__pycache__/
+*.pyc

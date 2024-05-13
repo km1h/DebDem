@@ -1,0 +1,21 @@
+{
+    "posts" : [
+        {
+            "id" : 1,
+            "content" : "Thoughts on the Stanford Bubble?",
+            "count" : 10
+        },
+
+        {
+            "id" : 2,
+            "content" : "Can we stop getting boba for on-call?",
+            "count" : 32
+        },
+
+        {
+            "id" : 3,
+            "content" : "Top golf for dorm trip!!!",
+            "count" : 4
+        }
+    ]
+}
