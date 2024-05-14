@@ -12,7 +12,7 @@ type JoinedRoomNavigationProp = NavigationProp<RootStackParamList, 'JoinedRoomPa
 
 interface JoinedRoomProps {
     route: JoinedRoomRouteProp;
-  }
+}
 
 const JoinedRoomPage: React.FC<JoinedRoomProps> = ({ route }) => {
     const roomId = route.params.data.roomId // for future use when pulling room specific data from backend
@@ -31,8 +31,8 @@ const JoinedRoomPage: React.FC<JoinedRoomProps> = ({ route }) => {
     return (
         <View style={styles.container}>
             <View style={styles.titleBox}>
-                <TouchableOpacity onPress={() => handleGoBack()}>
-                    <Text> Go Back </Text>
+                <TouchableOpacity onPress={() => handleGoBack()} style={{marginBottom: 10}}>
+                    <Ionicons name='arrow-back-outline' size={30}/>
                 </TouchableOpacity>
                 <Text style={styles.titleText}>
                     {roomContent}

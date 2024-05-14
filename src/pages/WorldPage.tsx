@@ -1,9 +1,12 @@
 import React, { useState, useEffect, } from 'react';
 import {ScrollView, Text, StyleSheet, View, TextInput, TouchableOpacity} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
+import { useNavigation, NavigationProp } from '@react-navigation/native';
+import { RootStackParamList } from '../components/NavigationTypes';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import postsData from '../data/posts.json'
 
+type WorldPageNavigationProp = NavigationProp<RootStackParamList, 'WorldPage'>;
 
 const WorldPage: React.FC = () => {
   const [posts, setPosts] = useState(postsData.posts.sort((a, b) => b.count - a.count));
@@ -11,6 +14,7 @@ const WorldPage: React.FC = () => {
   const [draft, setDraft] = useState('');
   const [hasUpvoted, setHasUpvoted] = useState(false); // TODO: update these from the backend
   const [hasDownvoted, setHasDownvoted] = useState(false);
+  const navigation = useNavigation<WorldPageNavigationProp>();
 
   const upvote = (postId: number) => {
     const update = hasUpvoted ? -1 : 1;
@@ -50,12 +54,20 @@ const WorldPage: React.FC = () => {
     };
     setPosts([...posts, newPost]);
   }
+
+  const handleNotifPress = () => {
+    navigation.navigate('InvitesPage')
+  }
+
   return (
     <View style={styles.container}>
       <View style={styles.titleBox}>
         <Text style={styles.titleText}>
           World
         </Text>
+        <TouchableOpacity style={{marginTop: 20}} onPress={() => handleNotifPress()}>
+          <Ionicons name='notifications' size={30}/>
+        </TouchableOpacity>
       </View>
       <TextInput style={styles.searchContainer}
         placeholder="Search"
@@ -125,6 +137,8 @@ const styles = StyleSheet.create({
     borderBottomWidth: 4,
     top: 65,
     width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'space-between'
   },
   searchContainer: {
     width: '100%',

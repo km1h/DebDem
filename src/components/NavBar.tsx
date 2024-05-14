@@ -28,14 +28,14 @@ const NavBar: React.FC = () => {
           let iconName;
 
           if (route.name === 'World') {
-            iconName = focused ? 'World' : 'earth';
+            iconName = focused ? 'earth' : 'earth';
           } else if (route.name === 'Rooms') {
-            iconName = focused ? 'Rooms' : 'copy-sharp';
+            iconName = focused ? 'copy-sharp' : 'copy-sharp';
           } else if (route.name === 'Profile') {
-            iconName = focused ? 'Person' : 'add-outline';
+            iconName = focused ? 'person-circle-outline' : 'person-circle-outline';
           }
 
-          return <Ionicons name={iconName ?? 'help'} size={size + 4} color={color} />;
+          return <Ionicons name={iconName ?? 'help'} size={size + 5} color={focused ? 'black' : 'gray'} />;
         },
       })}
     >
