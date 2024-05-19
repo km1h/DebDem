@@ -22,7 +22,6 @@ const LoginPage: React.FC<LoginPageProps> = ({ navigation }) => {
 
   // Check if user is already logged in
   useEffect(() => {
-    auth().signOut();
     const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
     return subscriber;
   }, []);
