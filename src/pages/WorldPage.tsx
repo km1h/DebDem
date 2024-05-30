@@ -18,7 +18,7 @@ function uploadVideo(roomId: number, videoFile: string) {
   // Execute FFmpeg command
   console.log(`Compressing video ${videoFile}`);
 
-  FFmpegKit.execute(`-y -i /Users/colinsullivan/Desktop/Mirror/StanfordStuff/CS278/DebDem/src/img/video.mp4 -r 30 -c:v libx264 -b:v 256k -vf scale=256:384 -aspect 2:3 -t 60s /Users/colinsullivan/Desktop/Mirror/StanfordStuff/CS278/DebDem/src/img/compressed_video.mp4`).then(async (session) => {
+  FFmpegKit.execute(`-y -i /Users/colinsullivan/Desktop/Mirror/StanfordStuff/CS278/DebDem/src/img/video.mp4 -r 30 -c:v libx264 -vf scale=256:384 -aspect 2:3 -t 60s /Users/colinsullivan/Desktop/Mirror/StanfordStuff/CS278/DebDem/src/img/compressed_video.mp4`).then(async (session) => {
       const returnCode = await session.getReturnCode();
       if (ReturnCode.isSuccess(returnCode)) {
         console.log(`Compression completed successfully`);
