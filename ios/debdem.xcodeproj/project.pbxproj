@@ -128,12 +128,6 @@
 			children = (
 				CC57C24F2BF9823C007E8D94 /* GoogleService-Info.plist */,
 				846342EA2BF0673F00F9BE46 /* Fonts */,
-				CC16511A2BF01E8400EFD7A1 /* GoogleService-Info.plist */,
-=======
-				CC16511A2BF01E8400EFD7A1 /* GoogleService-Info.plist */,
->>>>>>> set up firebase for android and ios
-=======
->>>>>>> added auth
 				13B07FAE1A68108700A75B9A /* debdem */,
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				00E356EF1AD99517003FC87E /* debdemTests */,
@@ -639,7 +633,10 @@
 					"-DFOLLY_CFG_NO_COROUTINES=1",
 					"-DFOLLY_HAVE_CLOCK_GETTIME=1",
 				);
-				OTHER_LDFLAGS = "$(inherited)  ";
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					" ",
+				);
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
 				USE_HERMES = true;
@@ -722,7 +719,10 @@
 					"-DFOLLY_CFG_NO_COROUTINES=1",
 					"-DFOLLY_HAVE_CLOCK_GETTIME=1",
 				);
-				OTHER_LDFLAGS = "$(inherited)  ";
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					" ",
+				);
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
 				USE_HERMES = true;

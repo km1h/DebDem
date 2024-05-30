@@ -6,6 +6,34 @@ import { RootStackParamList } from '../components/NavigationTypes';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import postsData from '../data/posts.json'
 
+
+// TODO put elsewhere
+import { FFmpegKit, ReturnCode } from 'ffmpeg-kit-react-native';
+import storage from '@react-native-firebase/storage';
+
+function uploadVideo(roomId: number, videoFile: string) {
+  // upload video to backend
+  console.log(`Uploading video ${videoFile} to room ${roomId}`);
+
+  // Execute FFmpeg command
+  console.log(`Compressing video ${videoFile}`);
+
+  FFmpegKit.execute(`-y -i /Users/colinsullivan/Desktop/Mirror/StanfordStuff/CS278/DebDem/src/img/video.mp4 -r 30 -c:v libx264 -b:v 512k -t 2s /Users/colinsullivan/Desktop/Mirror/StanfordStuff/CS278/DebDem/src/img/compressed_video.mp4`).then(async (session) => {
+      const returnCode = await session.getReturnCode();
+      if (ReturnCode.isSuccess(returnCode)) {
+        console.log(`Compression completed successfully`);
+        console.log("Uploading compressed video to backend");
+        storage().ref(`/Test/compressed_video1.mp4`).putFile(`/Users/colinsullivan/Desktop/Mirror/StanfordStuff/CS278/DebDem/src/img/compressed_video.mp4`).then(() => {
+          console.log(`Video uploaded successfully`);
+        });
+      } else if (ReturnCode.isCancel(returnCode)) {
+          console.log(`Compression was cancelled`);
+      } else {
+          console.log(`Compression failed. Please check the logs for the details.`);
+      }
+  });
+}
+
 type WorldPageNavigationProp = NavigationProp<RootStackParamList, 'WorldPage'>;
 
 const WorldPage: React.FC = () => {
@@ -28,6 +56,11 @@ const WorldPage: React.FC = () => {
     setHasUpvoted(!hasUpvoted);
     setHasDownvoted(false);
   }
+
+  useEffect(() => {
+    // console.log(require('../img/user1.jpeg'));
+    uploadVideo(1, "");
+  });
 
   const downvote = (postId: number) => {
     const update = hasDownvoted ? 1 : -1;

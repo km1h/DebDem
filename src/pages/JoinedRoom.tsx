@@ -7,6 +7,9 @@ import { RootStackParamList } from '../components/NavigationTypes';
 import { RouteProp, useNavigation, NavigationProp } from '@react-navigation/native';
 import Modal from 'react-native-modal';
 
+import { FFmpegKit, ReturnCode } from 'ffmpeg-kit-react-native';
+import storage from '@react-native-firebase/storage';
+
 type JoinedRoomRouteProp = RouteProp<RootStackParamList, 'JoinedRoomPage'>;
 type JoinedRoomNavigationProp = NavigationProp<RootStackParamList, 'JoinedRoomPage'>;
 

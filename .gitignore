@@ -24,6 +24,7 @@ DerivedData
 
 ios/debdem.xcodeproj/project.xcworkspace/
 ios/debdem.xcworkspace/xcshareddata/
+*.mp4
 
 # Android/IntelliJ
 #
