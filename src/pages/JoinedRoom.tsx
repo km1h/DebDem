@@ -1,13 +1,13 @@
 import React, { useState, useEffect, } from 'react';
-import {ScrollView, Text, StyleSheet, View, TouchableOpacity, Image, TextInput} from 'react-native';
-import LinearGradient from 'react-native-linear-gradient';
+import {ScrollView, Text, StyleSheet, View, TouchableOpacity, ActivityIndicator, TextInput} from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import roomsData from '../data/joinedRooms.json'
 import { RootStackParamList } from '../components/NavigationTypes';
 import { RouteProp, useNavigation, NavigationProp } from '@react-navigation/native';
 import Modal from 'react-native-modal';
+import Video from 'react-native-video';
 
 import { FFmpegKit, ReturnCode } from 'ffmpeg-kit-react-native';
+import firestore from '@react-native-firebase/firestore';
 import storage from '@react-native-firebase/storage';
 
 type JoinedRoomRouteProp = RouteProp<RootStackParamList, 'JoinedRoomPage'>;
@@ -22,6 +22,34 @@ const JoinedRoomPage: React.FC<JoinedRoomProps> = ({ route }) => {
     const roomContent = route.params.data.roomContent
     const [commentsVisible, setCommentsVisible] = useState(false);
     const navigation = useNavigation<JoinedRoomNavigationProp>();
+
+    const [videoUrls, setVideoUrls] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchVideos = async () => {
+          try {
+            // Fetch video paths from Firestore -- assuming the video urls are stored here, based on room specific ID's
+            const roomDoc = await firestore().collection('videos').doc(roomId).get();
+            const videoPaths = roomDoc.data().videos;
+    
+            // Fetch video URLs from Firebase Storage
+            const videoUrlsPromises = videoPaths.map(async (path: string | undefined) => {
+              const url = await storage().ref(path).getDownloadURL();
+              return url;
+            });
+    
+            const urls = await Promise.all(videoUrlsPromises);
+            setVideoUrls(urls);
+            setLoading(false);
+          } catch (error) {
+            console.error(error);
+            setLoading(false);
+          }
+        };
+    
+        fetchVideos();
+      }, [roomId]);
 
     const handleGoBack = () => {
         navigation.goBack();
@@ -43,36 +71,19 @@ const JoinedRoomPage: React.FC<JoinedRoomProps> = ({ route }) => {
             </View>
             <ScrollView style={{marginTop: 95}}>
                 <Text> Room Description </Text>
-                <View style={styles.videosContainer}>
-                    <TouchableOpacity onPress={() => toggleComments()}>
-                        <Image 
-                            source={require('../img/user1.jpeg')} 
-                            style={styles.video} 
-                            resizeMode="cover"
+                {loading ? (
+                        <ActivityIndicator size="large" color="#0000ff" />
+                    ) : (
+                        videoUrls.map((url, index) => (
+                        <Video
+                            key={index}
+                            source={{ uri: url }}
+                            style={styles.video}
+                            controls={true}
+                            resizeMode="contain"
                         />
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => toggleComments()}>
-                        <Image 
-                            source={require('../img/user2.jpeg')} 
-                            style={styles.video} 
-                            resizeMode="cover"
-                        />
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => toggleComments()}>
-                        <Image 
-                            source={require('../img/user3.jpeg')} 
-                            style={styles.video} 
-                            resizeMode="cover"
-                        />
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => toggleComments()}>
-                        <Image 
-                            source={require('../img/user4.jpeg')} 
-                            style={styles.video} 
-                            resizeMode="cover"
-                        />
-                    </TouchableOpacity>
-                </View>
+                        ))
+                    )} 
             </ScrollView >
             <Modal
                 isVisible={commentsVisible} 
