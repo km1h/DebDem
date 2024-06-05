@@ -12,26 +12,43 @@ import { FFmpegKit, ReturnCode } from 'ffmpeg-kit-react-native';
 import storage from '@react-native-firebase/storage';
 
 function uploadVideo(roomId: number, videoFile: string) {
+
   // upload video to backend
   console.log(`Uploading video ${videoFile} to room ${roomId}`);
 
   // Execute FFmpeg command
   console.log(`Compressing video ${videoFile}`);
 
-  FFmpegKit.execute(`-y -i /Users/colinsullivan/Desktop/Mirror/StanfordStuff/CS278/DebDem/src/img/video.mp4 -r 30 -c:v libx264 -vf scale=256:384 -aspect 2:3 -t 60s /Users/colinsullivan/Desktop/Mirror/StanfordStuff/CS278/DebDem/src/img/compressed_video.mp4`).then(async (session) => {
-      const returnCode = await session.getReturnCode();
-      if (ReturnCode.isSuccess(returnCode)) {
-        console.log(`Compression completed successfully`);
-        console.log("Uploading compressed video to backend");
-        storage().ref(`/Test/compressed_video1.mp4`).putFile(`/Users/colinsullivan/Desktop/Mirror/StanfordStuff/CS278/DebDem/src/img/compressed_video.mp4`).then(() => {
-          console.log(`Video uploaded successfully`);
-        });
-      } else if (ReturnCode.isCancel(returnCode)) {
-          console.log(`Compression was cancelled`);
-      } else {
-          console.log(`Compression failed. Please check the logs for the details.`);
-      }
-  });
+//   FFmpegKit.execute(`-y -i /Users/colinsullivan/Desktop/Mirror/StanfordStuff/CS278/DebDem/src/img/video.mp4 -r 30 -c:v libx264 -vf scale=256:384 -aspect 2:3 -t 3s /Users/colinsullivan/Desktop/Mirror/StanfordStuff/CS278/DebDem/src/img/compressed_video.mp4`).then(async (session) => {
+//       const returnCode = await session.getReturnCode();
+//       if (ReturnCode.isSuccess(returnCode)) {
+//         console.log(`Compression completed successfully`);
+//         console.log("Uploading compressed video to backend");
+//         storage().ref(`/Test/compressed_video1.mp4`).putFile(`/Users/colinsullivan/Desktop/Mirror/StanfordStuff/CS278/DebDem/src/img/compressed_video.mp4`).then(() => {
+//           console.log(`Video uploaded successfully`);
+//         });
+//       } else if (ReturnCode.isCancel(returnCode)) {
+//           console.log(`Compression was cancelled`);
+//       } else {
+//           console.log(`Compression failed. Please check the logs for the details.`);
+//       }
+//   });
+// }
+
+FFmpegKit.execute(`-y -i video.mp4 -r 30 -c:v libx264 -vf scale=256:384 -aspect 2:3 -t 3s /Users/colinsullivan/Desktop/Mirror/StanfordStuff/CS278/DebDem/src/img/compressed_video.mp4`).then(async (session) => {
+  const returnCode = await session.getReturnCode();
+  if (ReturnCode.isSuccess(returnCode)) {
+    console.log(`Compression completed successfully`);
+    console.log("Uploading compressed video to backend");
+    storage().ref(`/Test/compressed_video1.mp4`).putFile(`/Users/colinsullivan/Desktop/Mirror/StanfordStuff/CS278/DebDem/src/img/compressed_video.mp4`).then(() => {
+      console.log(`Video uploaded successfully`);
+    });
+  } else if (ReturnCode.isCancel(returnCode)) {
+      console.log(`Compression was cancelled`);
+  } else {
+      console.log(`Compression failed. Please check the logs for the details.`);
+  }
+});
 }
 
 type WorldPageNavigationProp = NavigationProp<RootStackParamList, 'WorldPage'>;
