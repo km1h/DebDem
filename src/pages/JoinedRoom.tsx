@@ -6,9 +6,15 @@ import { RouteProp, useNavigation, NavigationProp } from '@react-navigation/nati
 import Modal from 'react-native-modal';
 import Video from 'react-native-video';
 
+<<<<<<< Updated upstream
 import { FFmpegKit, ReturnCode } from 'ffmpeg-kit-react-native';
 import firestore from '@react-native-firebase/firestore';
 import storage from '@react-native-firebase/storage';
+=======
+import { fetchVideoDownloadURLs } from '../database/CloudStorage';
+import { fetchVideosFromRoom, fetchVideo, fetchComments } from '../database/Firestore';
+
+>>>>>>> Stashed changes
 
 type JoinedRoomRouteProp = RouteProp<RootStackParamList, 'JoinedRoomPage'>;
 type JoinedRoomNavigationProp = NavigationProp<RootStackParamList, 'JoinedRoomPage'>;
@@ -22,6 +28,8 @@ const JoinedRoomPage: React.FC<JoinedRoomProps> = ({ route }) => {
     const roomContent = route.params.data.roomContent
     const [commentsVisible, setCommentsVisible] = useState(false);
     const navigation = useNavigation<JoinedRoomNavigationProp>();
+    const [videos, setVideos] = useState([]);
+    const [comments, setComments] = useState([]);
 
     const [videoUrls, setVideoUrls] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -29,6 +37,7 @@ const JoinedRoomPage: React.FC<JoinedRoomProps> = ({ route }) => {
     useEffect(() => {
         const fetchVideos = async () => {
           try {
+<<<<<<< Updated upstream
             // Fetch video paths from Firestore -- assuming the video urls are stored here, based on room specific ID's
             const roomDoc = await firestore().collection('videos').doc(roomId).get();
             const videoPaths = roomDoc.data().videos;
@@ -40,14 +49,28 @@ const JoinedRoomPage: React.FC<JoinedRoomProps> = ({ route }) => {
             });
     
             const urls = await Promise.all(videoUrlsPromises);
+=======
+            const video_data = await fetchVideosFromRoom(roomId);
+            console.log(video_data);
+
+            if (!video_data) {
+              console.error('No video paths found');
+              setVideoUrls([]);
+              setLoading(false);
+              return;
+            }
+
+            const urls = await fetchVideoDownloadURLs(video_data.videos.paths);
+>>>>>>> Stashed changes
             setVideoUrls(urls);
+            setVideos(video_data.videos);
             setLoading(false);
           } catch (error) {
             console.error(error);
             setLoading(false);
           }
         };
-    
+        
         fetchVideos();
       }, [roomId]);
 
@@ -55,9 +78,24 @@ const JoinedRoomPage: React.FC<JoinedRoomProps> = ({ route }) => {
         navigation.goBack();
     };
 
-    const toggleComments = () => {
+    const toggleComments = (videoId: string) => {
         setCommentsVisible(!commentsVisible)
-    }
+        
+        const getComments = async () => {
+          try {
+            const comments_data = fetchComments(videoId);
+
+            if (!comments_data) {
+              console.error('No comments found');
+            }
+    
+            setComments(comments_data);
+          } catch(error) {
+            console.error(error);
+          }
+        }
+
+    };
 
     return (
         <View style={styles.container}>
@@ -71,19 +109,22 @@ const JoinedRoomPage: React.FC<JoinedRoomProps> = ({ route }) => {
             </View>
             <ScrollView style={{marginTop: 95}}>
                 <Text> Room Description </Text>
-                {loading ? (
-                        <ActivityIndicator size="large" color="#0000ff" />
-                    ) : (
+                {loading ? ( <ActivityIndicator size="large" color="#0000ff" /> ) : (
                         videoUrls.map((url, index) => (
-                        <Video
-                            key={index}
-                            source={{ uri: url }}
-                            style={styles.video}
-                            controls={true}
-                            resizeMode="contain"
-                        />
-                        ))
-                    )} 
+                          <View>
+                            <Video
+                              key={index}
+                              source={{ uri: url }}
+                              style={styles.video}
+                              controls={true}
+                              resizeMode="contain"
+                            />
+                            <TouchableOpacity onPress={() => toggleComments(videos.video.id)}>
+                              <Text> Comments </Text>
+                            </TouchableOpacity>
+                          </View>
+                        )))
+                  }
             </ScrollView >
             <Modal
                 isVisible={commentsVisible} 
@@ -101,6 +142,11 @@ const JoinedRoomPage: React.FC<JoinedRoomProps> = ({ route }) => {
                     </View>
                     <ScrollView>
                         <View> 
+                            {comments.map((comment, index) =>(
+                              <View style={styles.commentContainer}>
+                                <Text>{comment}</Text>
+                              </View>
+                            ))}
                             <Text style={{marginTop: 10, marginLeft: 5}}> Empty for now </Text>
                         </View>
                     </ScrollView>
@@ -168,6 +214,10 @@ const styles = StyleSheet.create({
   makeCommentContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between'
+  },
+  commentContainer: {
+    width: '80%',
+    marginBottom: 10
   },
   input: {
     height: 30,
