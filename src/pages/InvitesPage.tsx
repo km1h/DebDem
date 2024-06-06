@@ -12,11 +12,10 @@ const InvitesPage: React.FC = () => {
     const [invites] = useState(invitesData.invites);
     const navigation = useNavigation<InvitesPageNavigationProp>();
 
-    const handleRoomPress = (roomId: string, roomContent: string) => {
+    const handleRoomPress = (roomId: string) => {
         navigation.navigate('NotJoinedRoomPage', {
           data: {
             roomId: roomId,
-            roomContent: roomContent
           }
         })
     }
@@ -37,7 +36,7 @@ const InvitesPage: React.FC = () => {
         </View>
         <ScrollView style={styles.scrollContainter}>
             {invites.map((room, index) => (
-            <TouchableOpacity style={styles.roomContainer} key={room.id} onPress={() => handleRoomPress(room.id, room.content)}>
+            <TouchableOpacity style={styles.roomContainer} key={room.id} onPress={() => handleRoomPress(room.roomId)}>
                 <LinearGradient
                     colors={['rgba(239, 198, 155, 0.60)', 'rgba(119, 156, 171, 0.10)', 'rgba(0, 0, 0, 0)']}
                     style={{height: 100, borderRadius: 10, width: '100%', justifyContent: 'space-between'}}

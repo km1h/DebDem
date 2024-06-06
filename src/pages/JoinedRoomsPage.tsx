@@ -1,7 +1,6 @@
 import React, { useState, useEffect, } from 'react';
 import {ScrollView, Text, StyleSheet, View, TouchableOpacity} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
-import joinedRoomsData from '../data/joinedRooms.json';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../components/NavigationTypes';
 

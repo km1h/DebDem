@@ -15,7 +15,6 @@ interface NotJoinedRoomProps {
 
 const NotJoinedRoomPage: React.FC<NotJoinedRoomProps> = ({ route }) => {
     const roomId = route.params.data.roomId // for future use when pulling room specific data from backend
-    const roomContent = route.params.data.roomContent
     const navigation = useNavigation<NotJoinedRoomNavigationProp>();
     const [uploading, setUploading] = useState(false);
 
@@ -73,7 +72,7 @@ const NotJoinedRoomPage: React.FC<NotJoinedRoomProps> = ({ route }) => {
                     <Ionicons name='arrow-back-outline' size={30}/>
                 </TouchableOpacity>
                 <Text style={styles.titleText}>
-                    {roomContent}
+                    Room
                 </Text>
             </View>
             <ScrollView style={{marginTop: 95}}>
