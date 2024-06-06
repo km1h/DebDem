@@ -1,6 +1,7 @@
 import storage from '@react-native-firebase/storage';
 import firestore from '@react-native-firebase/firestore';
 
+import { TEST_WORLD_ID } from './Constants';
 import { Video, World, Room, Comment, Question, User } from './Structures';
 
 export async function fetchVideosFromRoom(roomId: string): Promise<Video[]> {
@@ -21,13 +22,21 @@ export async function fetchCommentsFromVideo(videoId: string): Promise<Comment[]
   }));
 }
 
+export async function fetchAllRooms(): Promise<Room[]> {
+  let world = await fetchWorld();
+  let roomIds: string[] = world.roomIds;
+  return await Promise.all(roomIds.map(async (roomId: string) => {
+    return fetchRoom(roomId);
+  }));
+}
+
 export async function fetchVideo(videoId: string): Promise<Video> {
   let videoDoc = await firestore().collection("video").doc(videoId).get();
   return videoDoc.data() as Video;
 }
 
 export async function fetchWorld(): Promise<World> {
-  let worldDoc = await firestore().collection("world").doc("test").get();
+  let worldDoc = await firestore().collection("world").doc(TEST_WORLD_ID).get();
   return worldDoc.data() as World;
 }
 

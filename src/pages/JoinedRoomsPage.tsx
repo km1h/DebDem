@@ -5,25 +5,30 @@ import joinedRoomsData from '../data/joinedRooms.json';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../components/NavigationTypes';
 
-import { fetchVideosFromRoom, fetchVideo } from '../database/Fetch';
+import { fetchAllRooms, fetchVideo } from '../database/Fetch';
 import { Room } from '../database/Structures';
 
 type JoinedRoomsPageNavigationProp = NavigationProp<RootStackParamList, 'JoinedRoomsPage'>;
 
 
 const RoomsPage: React.FC = () => {
-  const [joinedRooms] = useState<Room[]>(joinedRoomsData.rooms);
+  const [joinedRooms] = useState<Room[]>();
 
   const navigation = useNavigation<JoinedRoomsPageNavigationProp>();
 
-  const handleRoomPress = (roomId: string, roomContent: string) => {
+  const handleRoomPress = (roomId: string) => {
     navigation.navigate('JoinedRoomPage', {
       data: {
-        roomId: roomId,
-        roomContent: roomContent
+        roomId: roomId
       }
     })
   }
+
+  useEffect(() => {
+    let rooms = fetchAllRooms();
+    rooms.filter(room => room.userIds.includes())
+    setJoinedRooms(joinedRoomsData);
+  });
 
   return (
     <View style={styles.container}>

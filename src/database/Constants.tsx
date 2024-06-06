@@ -6,3 +6,5 @@ export const COMMENT_COLLECTION = "comments";
 export const QUESTION_COLLECTION = "questions";
 export const USER_COLLECTION = "users";
 export const WORLD_COLLECTION = "worlds";
+
+export const TEST_WORLD_ID = "test";

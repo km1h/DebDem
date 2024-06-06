@@ -18,7 +18,6 @@ interface JoinedRoomProps {
 
 const JoinedRoomPage: React.FC<JoinedRoomProps> = ({ route }) => {
     const roomId = route.params.data.roomId // for future use when pulling room specific data from backend
-    const roomContent = route.params.data.roomContent
     const [commentsVisible, setCommentsVisible] = useState(false);
     const navigation = useNavigation<JoinedRoomNavigationProp>();
     const [videos, setVideos] = useState<VideoStruct[]>([]);
@@ -78,9 +77,6 @@ const JoinedRoomPage: React.FC<JoinedRoomProps> = ({ route }) => {
                 <TouchableOpacity onPress={() => handleGoBack()} style={{marginBottom: 10}}>
                     <Ionicons name='arrow-back-outline' size={30}/>
                 </TouchableOpacity>
-                <Text style={styles.titleText}>
-                    {roomContent}
-                </Text>
             </View>
             <ScrollView style={{marginTop: 95}}>
                 <Text> Room Description </Text>
