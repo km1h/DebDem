@@ -10,7 +10,7 @@ export interface Room {
     description: string;
     videoIds: string[];
     userIds: string[];
-    timeInitialized: string;
+    timeInitialized: number;
 }
 
 export interface Comment {

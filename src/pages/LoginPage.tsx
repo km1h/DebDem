@@ -4,6 +4,7 @@ import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../components/NavigationTypes';
 import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth';
 import PhoneInput from "react-native-phone-number-input";
+import { postUser } from '../database/Post';
 
 type LoginPageNavigationProp = NavigationProp<RootStackParamList, 'LoginPage'>;
 
@@ -28,6 +29,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ navigation }) => {
 
   const onAuthStateChanged = (user: any) => {
     if (user) {
+      globalThis.userId = user.uid;
       navigation.navigate('WorldPage');
     }
   };
@@ -50,6 +52,16 @@ const LoginPage: React.FC<LoginPageProps> = ({ navigation }) => {
       .catch((error: any) => {
         Alert.alert('Invalid code.');
         console.log(error);
+      }).then(async (result) => {
+        if (!result) return;
+        let user: FirebaseAuthTypes.User = result.user;
+        let phoneNumber = user.phoneNumber ? user.phoneNumber : '';
+        postUser({
+          "userId": user.uid,
+          "phoneNumber": phoneNumber,
+          "firstName": "",
+          "lastName": ""
+        });
       });
     }
   }

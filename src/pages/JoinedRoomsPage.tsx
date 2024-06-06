@@ -5,14 +5,14 @@ import joinedRoomsData from '../data/joinedRooms.json';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../components/NavigationTypes';
 
-import { fetchAllRooms, fetchVideo } from '../database/Fetch';
+import { fetchAllRooms } from '../database/Fetch';
 import { Room } from '../database/Structures';
 
 type JoinedRoomsPageNavigationProp = NavigationProp<RootStackParamList, 'JoinedRoomsPage'>;
 
 
 const RoomsPage: React.FC = () => {
-  const [joinedRooms] = useState<Room[]>();
+  const [joinedRooms, setJoinedRooms] = useState<Room[]>([]);
 
   const navigation = useNavigation<JoinedRoomsPageNavigationProp>();
 
@@ -25,9 +25,10 @@ const RoomsPage: React.FC = () => {
   }
 
   useEffect(() => {
-    let rooms = fetchAllRooms();
-    rooms.filter(room => room.userIds.includes())
-    setJoinedRooms(joinedRoomsData);
+    let myUserId = globalThis.userId;
+    fetchAllRooms().then(rooms => {
+      setJoinedRooms(rooms.filter(room => room.userIds.includes(myUserId)));
+    });
   });
 
   return (
@@ -39,17 +40,17 @@ const RoomsPage: React.FC = () => {
       </View>
       <ScrollView style={styles.scrollContainter}>
 
-      {joinedRooms.map((room, index) => (
-          <TouchableOpacity style={styles.roomContainer} key={room.id} onPress={() => handleRoomPress(room.id, room.content)}>
+      {joinedRooms.map((room) => (
+          <TouchableOpacity style={styles.roomContainer} key={room.roomId} onPress={() => handleRoomPress(room.roomId)}>
               <LinearGradient
                 colors={['rgba(239, 198, 155, 0.60)', 'rgba(119, 156, 171, 0.10)', 'rgba(0, 0, 0, 0)']}
                 style={{height: 100, borderRadius: 10, width: '100%', justifyContent: 'space-between'}}
               >
                 <Text style={styles.roomText}>
-                  {room.content}
+                  {room.title}
                 </Text>
                 <Text style={styles.timerText}>
-                  Time Remaining: {room.time}
+                  Time Remaining: {room.timeInitialized + 1000*60*60*24*7 - Date.now()}
                 </Text>
               </LinearGradient>
 
