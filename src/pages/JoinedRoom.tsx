@@ -6,9 +6,8 @@ import { RouteProp, useNavigation, NavigationProp } from '@react-navigation/nati
 import Modal from 'react-native-modal';
 import Video from 'react-native-video';
 
-import { FFmpegKit, ReturnCode } from 'ffmpeg-kit-react-native';
-import firestore from '@react-native-firebase/firestore';
-import storage from '@react-native-firebase/storage';
+import { fetchVideoDownloadURLs } from '../database/CloudStorage';
+import { fetchVideosFromRoom } from '../database/Firestore';
 
 type JoinedRoomRouteProp = RouteProp<RootStackParamList, 'JoinedRoomPage'>;
 type JoinedRoomNavigationProp = NavigationProp<RootStackParamList, 'JoinedRoomPage'>;
@@ -29,10 +28,7 @@ const JoinedRoomPage: React.FC<JoinedRoomProps> = ({ route }) => {
     useEffect(() => {
         const fetchVideos = async () => {
           try {
-            // Fetch video paths from Firestore -- assuming the video urls are stored here, based on room specific ID's
-            const videosDoc = await firestore().collection("videos").doc("room-0").get();
-            const videoPaths = videosDoc.get("videoPaths");
-
+            const videoPaths = await fetchVideosFromRoom(roomId);
             console.log(videoPaths);
 
             if (!videoPaths) {
@@ -41,14 +37,8 @@ const JoinedRoomPage: React.FC<JoinedRoomProps> = ({ route }) => {
               setLoading(false);
               return;
             }
-    
-            // Fetch video URLs from Firebase Storage
-            const videoUrlsPromises = videoPaths.map(async (path: string | undefined) => {
-              const url = await storage().ref(path).getDownloadURL();
-              return url;
-            });
-    
-            const urls = await Promise.all(videoUrlsPromises);
+
+            const urls = await fetchVideoDownloadURLs(videoPaths);
             setVideoUrls(urls);
             setLoading(false);
           } catch (error) {
