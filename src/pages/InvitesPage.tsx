@@ -12,7 +12,7 @@ const InvitesPage: React.FC = () => {
     const [invites] = useState(invitesData.invites);
     const navigation = useNavigation<InvitesPageNavigationProp>();
 
-    const handleRoomPress = (roomId: string, roomContent: string) => {
+    const handleRoomPress = (roomId: number, roomContent: string) => {
         navigation.navigate('NotJoinedRoomPage', {
           data: {
             roomId: roomId,
