@@ -5,6 +5,7 @@ import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../components/NavigationTypes';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import postsData from '../data/posts.json'
+import { fetchWorld } from '../database/Firestore';
 
 
 // TODO put elsewhere
@@ -37,13 +38,39 @@ function uploadVideo(roomId: number, videoFile: string) {
 type WorldPageNavigationProp = NavigationProp<RootStackParamList, 'WorldPage'>;
 
 const WorldPage: React.FC = () => {
-  const [posts, setPosts] = useState(postsData.posts.sort((a, b) => b.count - a.count));
+  const [posts, setPosts] = useState([]);
   const [isPosting, setIsPosting] = useState(false);
   const [draft, setDraft] = useState('');
   const [hasUpvoted, setHasUpvoted] = useState(false); // TODO: update these from the backend
   const [hasDownvoted, setHasDownvoted] = useState(false);
   const navigation = useNavigation<WorldPageNavigationProp>();
 
+  
+  useEffect(() => {
+    const loadWorldData = async () => {
+      
+      
+      try {
+        const data = await fetchWorld();
+        console.log(data);
+
+        if (!data) {
+          console.error('No data found');
+          return;
+        }
+        
+        setPosts(data.questions); // assuming the function returns questions
+        posts.sort((a, b) => b.count - a.count);
+
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    loadWorldData();
+  }, []);
+  
+  
   const upvote = (postId: number) => {
     const update = hasUpvoted ? -1 : 1;
     const updatedPosts = posts.map(post => {
@@ -107,29 +134,31 @@ const WorldPage: React.FC = () => {
         placeholderTextColor={'white'}
       />
       <ScrollView style={styles.scrollContainer}>
+
         {posts.map((post, index) => (
           <View style={styles.postContatiner} key={post.id}>
-              <LinearGradient
-                start={{x: 0, y: 0}} 
-                end={{x: 1, y: 0}}
-                colors={['rgba(239, 198, 155, 0.60)', 'rgba(119, 156, 171, 0.10)', 'rgba(0, 0, 0, 0)']}
-                style={{height: 50, borderRadius: 10, width: '80%'}}
-              >
-                <Text style={styles.postText}>
-                  {post.content}
-                </Text>
-              </LinearGradient>
-              <View style={styles.interactables}>
-                <TouchableOpacity onPress={() => upvote(post.id)}>
-                    <Text style={{fontSize: 20, fontWeight: hasUpvoted ? 'bold' : 'normal'}}> + </Text>
-                </TouchableOpacity>
-                <Text> {post.count} </Text>
-                <TouchableOpacity onPress={() => downvote(post.id)}>
-                    <Text style={{fontSize: 30, fontWeight: hasDownvoted ? 'bold' : 'normal'}}> - </Text>
-                </TouchableOpacity>
-              </View>
+            <LinearGradient
+              start={{x: 0, y: 0}} 
+              end={{x: 1, y: 0}}
+              colors={['rgba(239, 198, 155, 0.60)', 'rgba(119, 156, 171, 0.10)', 'rgba(0, 0, 0, 0)']}
+              style={{height: 50, borderRadius: 10, width: '80%'}}
+            >
+              <Text style={styles.postText}>
+                {post.content}
+              </Text>
+            </LinearGradient>
+            <View style={styles.interactables}>
+              <TouchableOpacity onPress={() => upvote(post.id)}>
+                  <Text style={{fontSize: 20, fontWeight: hasUpvoted ? 'bold' : 'normal'}}> + </Text>
+              </TouchableOpacity>
+              <Text> {post.count} </Text>
+              <TouchableOpacity onPress={() => downvote(post.id)}>
+                  <Text style={{fontSize: 30, fontWeight: hasDownvoted ? 'bold' : 'normal'}}> - </Text>
+              </TouchableOpacity>
             </View>
+          </View>
         ))}
+
       </ScrollView>
       <View style={styles.postButtonContainer}>
         <View style={{flexDirection: 'row'}}>

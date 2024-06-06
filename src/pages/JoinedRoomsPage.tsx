@@ -5,6 +5,8 @@ import joinedRoomsData from '../data/joinedRooms.json';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../components/NavigationTypes';
 
+import { fetchVideosFromRoom, fetchVideo } from '../database/Firestore';
+
 type JoinedRoomsPageNavigationProp = NavigationProp<RootStackParamList, 'JoinedRoomsPage'>;
 
 
