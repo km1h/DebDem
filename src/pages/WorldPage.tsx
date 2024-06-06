@@ -12,7 +12,7 @@ import { fetchWorld } from '../database/Firestore';
 import { FFmpegKit, ReturnCode } from 'ffmpeg-kit-react-native';
 import storage from '@react-native-firebase/storage';
 
-function uploadVideo(roomId: number, videoFile: string) {
+function uploadVideo(roomId: string, videoFile: string) {
   // upload video to backend
   console.log(`Uploading video ${videoFile} to room ${roomId}`);
 

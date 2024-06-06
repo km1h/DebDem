@@ -6,15 +6,8 @@ import { RouteProp, useNavigation, NavigationProp } from '@react-navigation/nati
 import Modal from 'react-native-modal';
 import Video from 'react-native-video';
 
-<<<<<<< Updated upstream
-import { FFmpegKit, ReturnCode } from 'ffmpeg-kit-react-native';
-import firestore from '@react-native-firebase/firestore';
-import storage from '@react-native-firebase/storage';
-=======
-import { fetchVideoDownloadURLs } from '../database/CloudStorage';
-import { fetchVideosFromRoom, fetchVideo, fetchComments } from '../database/Firestore';
-
->>>>>>> Stashed changes
+import { fetchVideosFromRoom, fetchVideoDownloadURLs, fetchCommentsFromVideo } from '../database/Fetch';
+import { Video as VideoStruct, Comment } from '../database/Structures';
 
 type JoinedRoomRouteProp = RouteProp<RootStackParamList, 'JoinedRoomPage'>;
 type JoinedRoomNavigationProp = NavigationProp<RootStackParamList, 'JoinedRoomPage'>;
@@ -28,42 +21,28 @@ const JoinedRoomPage: React.FC<JoinedRoomProps> = ({ route }) => {
     const roomContent = route.params.data.roomContent
     const [commentsVisible, setCommentsVisible] = useState(false);
     const navigation = useNavigation<JoinedRoomNavigationProp>();
-    const [videos, setVideos] = useState([]);
-    const [comments, setComments] = useState([]);
+    const [videos, setVideos] = useState<VideoStruct[]>([]);
+    const [comments, setComments] = useState<Comment[]>([]);
 
-    const [videoUrls, setVideoUrls] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [videoUrls, setVideoUrls] = useState<string[]>([]);
+    const [loading, setLoading] = useState<boolean>(true);
 
     useEffect(() => {
         const fetchVideos = async () => {
           try {
-<<<<<<< Updated upstream
-            // Fetch video paths from Firestore -- assuming the video urls are stored here, based on room specific ID's
-            const roomDoc = await firestore().collection('videos').doc(roomId).get();
-            const videoPaths = roomDoc.data().videos;
-    
-            // Fetch video URLs from Firebase Storage
-            const videoUrlsPromises = videoPaths.map(async (path: string | undefined) => {
-              const url = await storage().ref(path).getDownloadURL();
-              return url;
-            });
-    
-            const urls = await Promise.all(videoUrlsPromises);
-=======
-            const video_data = await fetchVideosFromRoom(roomId);
-            console.log(video_data);
+            const videos = await fetchVideosFromRoom(roomId);
+            console.log(videos);
 
-            if (!video_data) {
+            if (!videos) {
               console.error('No video paths found');
               setVideoUrls([]);
               setLoading(false);
               return;
             }
 
-            const urls = await fetchVideoDownloadURLs(video_data.videos.paths);
->>>>>>> Stashed changes
+            const urls = await fetchVideoDownloadURLs(videos);
             setVideoUrls(urls);
-            setVideos(video_data.videos);
+            setVideos(videos);
             setLoading(false);
           } catch (error) {
             console.error(error);
@@ -83,18 +62,14 @@ const JoinedRoomPage: React.FC<JoinedRoomProps> = ({ route }) => {
         
         const getComments = async () => {
           try {
-            const comments_data = fetchComments(videoId);
-
-            if (!comments_data) {
-              console.error('No comments found');
-            }
-    
+            const comments_data = await fetchCommentsFromVideo(videoId);
             setComments(comments_data);
           } catch(error) {
             console.error(error);
           }
         }
 
+        getComments();
     };
 
     return (
@@ -119,7 +94,7 @@ const JoinedRoomPage: React.FC<JoinedRoomProps> = ({ route }) => {
                               controls={true}
                               resizeMode="contain"
                             />
-                            <TouchableOpacity onPress={() => toggleComments(videos.video.id)}>
+                            <TouchableOpacity onPress={() => toggleComments(videos[index].videoId)}>
                               <Text> Comments </Text>
                             </TouchableOpacity>
                           </View>

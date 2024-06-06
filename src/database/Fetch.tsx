@@ -12,6 +12,15 @@ export async function fetchVideosFromRoom(roomId: string): Promise<Video[]> {
   }));
 }
 
+export async function fetchCommentsFromVideo(videoId: string): Promise<Comment[]> {
+  console.log(`Fetching comments from video ${videoId}`);
+  const videoDoc = await firestore().collection("video").doc(videoId).get();
+  let commentIds: string[] = videoDoc.get("commentIds");
+  return await Promise.all(commentIds.map(async (commentId: string) => {
+    return fetchComment(commentId);
+  }));
+}
+
 export async function fetchVideo(videoId: string): Promise<Video> {
   let videoDoc = await firestore().collection("video").doc(videoId).get();
   return videoDoc.data() as Video;
