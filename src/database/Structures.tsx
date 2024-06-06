@@ -1,6 +1,6 @@
 export interface Video {
     videoId: string;
-    videoURI: string;
+    videoURI: string | undefined;
     commentIds: string[];
 }
 
@@ -15,13 +15,13 @@ export interface Room {
 
 export interface Comment {
     commentId: string;
-    content: string;
+    content: string | undefined;
     userId: string;
     timePosted: string;
 }
 
 export interface Question {
-    questionId: string;
+    questionId: number;
     title: string;
     description: string;
     yesVotes: number;
@@ -41,4 +41,12 @@ export interface World {
     questionIds: string[];
     userIds: string[];
     roomIds: string[];
+}
+
+export type MediaType = 'video';
+export type VideoQuality = 'medium';
+
+export interface CameraOptions {
+  mediaType: MediaType;
+  videoQuality: VideoQuality;
 }

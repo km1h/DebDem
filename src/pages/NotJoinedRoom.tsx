@@ -3,8 +3,9 @@ import {ScrollView, Text, StyleSheet, View, TouchableOpacity, Button, ActivityIn
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { RootStackParamList } from '../components/NavigationTypes';
 import { RouteProp, useNavigation, NavigationProp } from '@react-navigation/native';
-import { launchCamera } from 'react-native-image-picker';
+import { ImagePickerResponse, launchCamera } from 'react-native-image-picker';
 import storage from '@react-native-firebase/storage';
+import { CameraOptions } from '../database/Structures';
 
 type NotJoinedRoomRouteProp = RouteProp<RootStackParamList, 'NotJoinedRoomPage'>;
 type NotJoinedRoomNavigationProp = NavigationProp<RootStackParamList, 'NotJoinedRoomPage'>;
@@ -23,17 +24,17 @@ const NotJoinedRoomPage: React.FC<NotJoinedRoomProps> = ({ route }) => {
     };
 
     const recordVideo = () => {
-      const options = {
+      const options: CameraOptions = {
         mediaType: 'video',
-        videoQuality: 'high',
+        videoQuality: 'medium',
       };
 
-      launchCamera(options, async (response: { didCancel: any; errorCode: any; assets: { uri: any; }[]; }) => {
+      launchCamera(options, (response: ImagePickerResponse) => {
         if (response.didCancel) {
           console.log('User cancelled video recording');
         } else if (response.errorCode) {
           console.log('Video recording error: ', response.errorCode);
-        } else {
+        } else if (response.assets && response.assets.length > 0) {
           const videoUri = response.assets[0].uri;
           uploadVideo(videoUri);
         }
