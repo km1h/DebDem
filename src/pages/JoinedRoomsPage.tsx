@@ -13,7 +13,7 @@ const RoomsPage: React.FC = () => {
 
   const navigation = useNavigation<JoinedRoomsPageNavigationProp>();
 
-  const handleRoomPress = (roomId: number, roomContent: string) => {
+  const handleRoomPress = (roomId: string, roomContent: string) => {
     navigation.navigate('JoinedRoomPage', {
       data: {
         roomId: roomId,
