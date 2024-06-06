@@ -3,8 +3,10 @@ import {ScrollView, Text, StyleSheet, View, TouchableOpacity, Button, ActivityIn
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { RootStackParamList } from '../components/NavigationTypes';
 import { RouteProp, useNavigation, NavigationProp } from '@react-navigation/native';
-import { launchCamera } from 'react-native-image-picker';
+import { ImagePickerResponse, launchCamera } from 'react-native-image-picker';
 import storage from '@react-native-firebase/storage';
+import {fetchRoom} from '../database/Fetch';
+import { Room, CameraOptions } from '../database/Structures'
 
 type NotJoinedRoomRouteProp = RouteProp<RootStackParamList, 'NotJoinedRoomPage'>;
 type NotJoinedRoomNavigationProp = NavigationProp<RootStackParamList, 'NotJoinedRoomPage'>;
@@ -15,55 +17,83 @@ interface NotJoinedRoomProps {
 
 const NotJoinedRoomPage: React.FC<NotJoinedRoomProps> = ({ route }) => {
     const roomId = route.params.data.roomId // for future use when pulling room specific data from backend
-    const roomContent = route.params.data.roomContent
+    const [room, setRoom] = useState<Room>()
     const navigation = useNavigation<NotJoinedRoomNavigationProp>();
     const [uploading, setUploading] = useState(false);
+    
+    useEffect(() => { 
+      const getRoomData = async () => {
+        try {
+          const data = await fetchRoom(roomId);
+          console.log(data);
 
+          if (!data) {
+            console.error('No room found');
+            return;
+          }
+
+          setRoom(data);
+
+        } catch (error) {
+          console.error(error);
+        }
+      };
+      getRoomData();
+    }, [roomId]);
+    
+    
     const handleGoBack = () => {
         navigation.goBack();
     };
 
     const recordVideo = () => {
-      const options = {
+      const options: CameraOptions = {
         mediaType: 'video',
-        videoQuality: 'high',
+        videoQuality: 'medium',
       };
-
-      launchCamera(options, async (response: { didCancel: any; errorCode: any; assets: { uri: any; }[]; }) => {
+      launchCamera(options, (response: ImagePickerResponse) => {
         if (response.didCancel) {
           console.log('User cancelled video recording');
         } else if (response.errorCode) {
           console.log('Video recording error: ', response.errorCode);
-        } else {
+        } else if (response.assets && response.assets.length > 0) {
           const videoUri = response.assets[0].uri;
           uploadVideo(videoUri);
         }
       });
     };
 
-    const uploadVideo = async (uri: string) => {
-      setUploading(true);
-      const fileName = uri.substring(uri.lastIndexOf('/') + 1);
-      const reference = storage().ref(`videos/${fileName}`);  // assuming this is how the video urls are stored
-  
-      try {
-        const task = reference.putFile(uri);
-  
-        task.on('state_changed', (snapshot) => {
-          console.log(
-            `${snapshot.bytesTransferred} transferred out of ${snapshot.totalBytes}`
-          );
-        });
-  
-        await task;
-        const url = await reference.getDownloadURL();
-        Alert.alert('Video uploaded!', `Video URL: ${url}`);
-      } catch (e) {
-        console.error(e);
-        Alert.alert('Upload failed', 'Sorry, something went wrong.');
+    const uploadVideo = async (uri: string | undefined) => {
+
+      if (!uri) {
+        console.error('Could not upload video');
+
+      } else {
+
+        setUploading(true);
+        const fileName = uri.substring(uri.lastIndexOf('/') + 1);
+        const reference = storage().ref(`videos/${fileName}`);  // assuming this is how the video urls are stored
+    
+        try {
+          const task = reference.putFile(uri);
+    
+          task.on('state_changed', (snapshot) => {
+            console.log(
+              `${snapshot.bytesTransferred} transferred out of ${snapshot.totalBytes}`
+            );
+          });
+    
+          await task;
+          const url = await reference.getDownloadURL();
+          Alert.alert('Video uploaded!', `Video URL: ${url}`);
+        } catch (e) {
+          console.error(e);
+          Alert.alert('Upload failed', 'Sorry, something went wrong.');
+        }
+    
+        setUploading(false);
       }
-  
-      setUploading(false);
+
     };
 
     return (
@@ -73,11 +103,13 @@ const NotJoinedRoomPage: React.FC<NotJoinedRoomProps> = ({ route }) => {
                     <Ionicons name='arrow-back-outline' size={30}/>
                 </TouchableOpacity>
                 <Text style={styles.titleText}>
-                    {roomContent}
+                    {room?.title}
                 </Text>
             </View>
             <ScrollView style={{marginTop: 95}}>
-               <Text>Description</Text>
+               <Text>
+                  {room?.description}
+                </Text>
             </ScrollView >
             <TouchableOpacity style={styles.uploadButton} onPress={recordVideo}>
                 <Text>Upload</Text>

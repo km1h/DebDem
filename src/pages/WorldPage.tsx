@@ -5,7 +5,8 @@ import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../components/NavigationTypes';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import postsData from '../data/posts.json'
-import { fetchWorld } from '../database/Firestore';
+import { fetchWorld, fetchAllQuestions } from '../database/Fetch';
+import { World, Question } from '../database/Structures';
 
 
 // TODO put elsewhere
@@ -38,7 +39,8 @@ function uploadVideo(roomId: number, videoFile: string) {
 type WorldPageNavigationProp = NavigationProp<RootStackParamList, 'WorldPage'>;
 
 const WorldPage: React.FC = () => {
-  const [posts, setPosts] = useState([]);
+  const [world, setWorld] = useState<World>();
+  const [posts, setPosts] = useState<Question[]>([]);
   const [isPosting, setIsPosting] = useState(false);
   const [draft, setDraft] = useState('');
   const [hasUpvoted, setHasUpvoted] = useState(false); // TODO: update these from the backend
@@ -48,34 +50,30 @@ const WorldPage: React.FC = () => {
   
   useEffect(() => {
     const loadWorldData = async () => {
-      
-      
       try {
         const data = await fetchWorld();
         console.log(data);
-
         if (!data) {
           console.error('No data found');
           return;
         }
         
-        setPosts(data.questions); // assuming the function returns questions
-        posts.sort((a, b) => b.count - a.count);
+        setWorld(data);
 
       } catch (error) {
         console.error(error);
       }
     };
-
     loadWorldData();
-  }, []);
+    fetchAllQuestions().then(questions => setPosts(questions))
+  });
   
   
   const upvote = (postId: number) => {
     const update = hasUpvoted ? -1 : 1;
     const updatedPosts = posts.map(post => {
-      if (post.id === postId) {
-        return {...post, count: post.count + update };
+      if (post.questionId === postId) {
+        return {...post, count: post.yesVotes + update };
       }
       return post
     });
@@ -92,8 +90,8 @@ const WorldPage: React.FC = () => {
   const downvote = (postId: number) => {
     const update = hasDownvoted ? 1 : -1;
     const updatedPosts = posts.map(post => {
-      if (post.id === postId) {
-        return { ...post, count: post.count + update };
+      if (post.questionId === postId) {
+        return { ...post, count: post.yesVotes + update };
       }
       return post
     });
@@ -108,10 +106,14 @@ const WorldPage: React.FC = () => {
 
   const makePost = (content: string) => {
     const newPost = {
-      id: posts.length,
-      content: content,
-      count: 0
+      questionId: posts.length,
+      title: content,
+      description: content,
+      yesVotes: 0,
+      noVotes: 0,
+      userIds: []
     };
+
     setPosts([...posts, newPost]);
   }
 
@@ -136,7 +138,7 @@ const WorldPage: React.FC = () => {
       <ScrollView style={styles.scrollContainer}>
 
         {posts.map((post, index) => (
-          <View style={styles.postContatiner} key={post.id}>
+          <View style={styles.postContatiner} key={post.questionId}>
             <LinearGradient
               start={{x: 0, y: 0}} 
               end={{x: 1, y: 0}}
@@ -144,15 +146,15 @@ const WorldPage: React.FC = () => {
               style={{height: 50, borderRadius: 10, width: '80%'}}
             >
               <Text style={styles.postText}>
-                {post.content}
+                {post.title}
               </Text>
             </LinearGradient>
             <View style={styles.interactables}>
-              <TouchableOpacity onPress={() => upvote(post.id)}>
+              <TouchableOpacity onPress={() => upvote(post.questionId)}>
                   <Text style={{fontSize: 20, fontWeight: hasUpvoted ? 'bold' : 'normal'}}> + </Text>
               </TouchableOpacity>
-              <Text> {post.count} </Text>
-              <TouchableOpacity onPress={() => downvote(post.id)}>
+              <Text> {post.yesVotes} </Text>
+              <TouchableOpacity onPress={() => downvote(post.questionId)}>
                   <Text style={{fontSize: 30, fontWeight: hasDownvoted ? 'bold' : 'normal'}}> - </Text>
               </TouchableOpacity>
             </View>

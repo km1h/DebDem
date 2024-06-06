@@ -3,20 +3,31 @@ import {ScrollView, Text, View, StyleSheet, TouchableOpacity} from 'react-native
 import LinearGradient from 'react-native-linear-gradient';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../components/NavigationTypes';
-import invitesData from '../data/invitedRooms.json';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { Room } from '../database/Structures';
+import { fetchAllRooms } from '../database/Fetch';
 
 type InvitesPageNavigationProp = NavigationProp<RootStackParamList, 'InvitesPage'>;
 
 const InvitesPage: React.FC = () => {
-    const [invites] = useState(invitesData.invites);
     const navigation = useNavigation<InvitesPageNavigationProp>();
+    const [invites, setInvites] = useState<Room[]>([]);
 
+<<<<<<< Updated upstream
     const handleRoomPress = (roomId: number, roomContent: string) => {
+=======
+    useEffect(() => {
+      let myUserId = globalThis.userId;
+      fetchAllRooms().then(rooms => {
+        setInvites(rooms.filter(room => !room.userIds.includes(myUserId)));
+      });
+    });
+
+    const handleRoomPress = (roomId: string) => {
+>>>>>>> Stashed changes
         navigation.navigate('NotJoinedRoomPage', {
           data: {
             roomId: roomId,
-            roomContent: roomContent
           }
         })
     }
@@ -37,13 +48,13 @@ const InvitesPage: React.FC = () => {
         </View>
         <ScrollView style={styles.scrollContainter}>
             {invites.map((room, index) => (
-            <TouchableOpacity style={styles.roomContainer} key={room.id} onPress={() => handleRoomPress(room.id, room.content)}>
+            <TouchableOpacity style={styles.roomContainer} key={room.id} onPress={() => handleRoomPress(room.id)}>
                 <LinearGradient
                     colors={['rgba(239, 198, 155, 0.60)', 'rgba(119, 156, 171, 0.10)', 'rgba(0, 0, 0, 0)']}
                     style={{height: 100, borderRadius: 10, width: '100%', justifyContent: 'space-between'}}
                 >
                     <Text style={styles.roomText}>
-                    {room.content}
+                    {room.title}
                     </Text>
                     <TouchableOpacity style={styles.uploadButton}>
                         <Text>Upload</Text>

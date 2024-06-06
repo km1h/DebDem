@@ -1,8 +1,31 @@
 import React, { useState, useEffect, } from 'react';
 import {ScrollView, Text, View, StyleSheet} from 'react-native';
+import {User} from '../database/Structures';
+import { fetchUser } from '../database/Fetch';
 
 const ProfilePage: React.FC = () => {
-  
+  const [user, setUser] = useState<User>()
+
+  useEffect(() => {
+    const getUser = async () => {
+      try {
+        const data = await fetchUser(globalThis.userId);
+        console.log(data);
+
+        if (!data) {
+          console.error('No User Found');
+          return;
+        }
+
+        setUser(data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    getUser();
+  });
+
+
   return (
     <View style={styles.container}>
       <View style={styles.titleBox}>
@@ -11,7 +34,21 @@ const ProfilePage: React.FC = () => {
         </Text>
       </View>
       <ScrollView style={styles.scrollContainter}>
-        <Text> profile settings </Text>
+        <View style={{
+          flexDirection: 'row',
+          width: "100%",
+          justifyContent: 'space-around',
+          marginTop: 20,
+          marginBottom: 20,
+        }}>
+          <Text style={styles.nameContainers}> {user?.firstName} </Text>
+          <Text style={styles.nameContainers}> {user?.lastName} </Text>
+        </View>
+        <Text style={{
+          alignSelf: 'center'
+        }}>
+          {user?.phoneNumber}
+        </Text>
       </ScrollView>
     </View>
   );
@@ -36,6 +73,14 @@ const styles = StyleSheet.create({
   },
   scrollContainter: {
     marginTop: 80,
+  },
+  nameContainers: {
+    height: 40,
+    backgroundColor: 'rgba(119, 156, 171, 0.30)',
+    borderRadius: 10,
+    marginBottom: 10,
+    paddingLeft: 10,
+    width: '40%',
   }
 });
 

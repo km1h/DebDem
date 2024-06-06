@@ -7,6 +7,7 @@ import Modal from 'react-native-modal';
 import Video from 'react-native-video';
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 import { FFmpegKit, ReturnCode } from 'ffmpeg-kit-react-native';
 import firestore from '@react-native-firebase/firestore';
 import storage from '@react-native-firebase/storage';
@@ -14,6 +15,11 @@ import storage from '@react-native-firebase/storage';
 import { fetchVideoDownloadURLs } from '../database/CloudStorage';
 import { fetchVideosFromRoom, fetchVideo, fetchComments } from '../database/Firestore';
 
+>>>>>>> Stashed changes
+=======
+import { fetchVideosFromRoom, fetchVideoDownloadURLs, fetchCommentsFromVideo, fetchRoom } from '../database/Fetch';
+import { Video as VideoStruct, Comment, Room } from '../database/Structures';
+import { postComment } from '../database/Post';
 >>>>>>> Stashed changes
 
 type JoinedRoomRouteProp = RouteProp<RootStackParamList, 'JoinedRoomPage'>;
@@ -25,6 +31,7 @@ interface JoinedRoomProps {
 
 const JoinedRoomPage: React.FC<JoinedRoomProps> = ({ route }) => {
     const roomId = route.params.data.roomId // for future use when pulling room specific data from backend
+<<<<<<< Updated upstream
     const roomContent = route.params.data.roomContent
     const [commentsVisible, setCommentsVisible] = useState(false);
     const navigation = useNavigation<JoinedRoomNavigationProp>();
@@ -33,6 +40,19 @@ const JoinedRoomPage: React.FC<JoinedRoomProps> = ({ route }) => {
 
     const [videoUrls, setVideoUrls] = useState([]);
     const [loading, setLoading] = useState(true);
+=======
+    const [room, setRoom] = useState<Room>()
+    const navigation = useNavigation<JoinedRoomNavigationProp>();
+
+    const [commentsVisible, setCommentsVisible] = useState(false);
+    const [comments, setComments] = useState<Comment[]>([]);
+    const [haveComments, setHaveComments] = useState(false);
+    const [madeComment, setMadeComment] = useState<string>();
+
+    const [videos, setVideos] = useState<VideoStruct[]>([]);
+    const [videoUrls, setVideoUrls] = useState<string[]>([]);
+    const [loading, setLoading] = useState<boolean>(true);
+>>>>>>> Stashed changes
 
     useEffect(() => {
         const fetchVideos = async () => {
@@ -70,7 +90,25 @@ const JoinedRoomPage: React.FC<JoinedRoomProps> = ({ route }) => {
             setLoading(false);
           }
         };
-        
+
+        const getRoomData = async () => {
+          try {
+            const data = await fetchRoom(roomId);
+            console.log(data);
+  
+            if (!data) {
+              console.error('No room found');
+              return;
+            }
+  
+            setRoom(data);
+  
+          } catch (error) {
+            console.error(error);
+          }
+        };
+
+        getRoomData();
         fetchVideos();
       }, [roomId]);
 
@@ -78,9 +116,10 @@ const JoinedRoomPage: React.FC<JoinedRoomProps> = ({ route }) => {
         navigation.goBack();
     };
 
-    const toggleComments = (videoId: string) => {
+    const toggleComments = (videoId?: string) => {
         setCommentsVisible(!commentsVisible)
         
+<<<<<<< Updated upstream
         const getComments = async () => {
           try {
             const comments_data = fetchComments(videoId);
@@ -92,9 +131,41 @@ const JoinedRoomPage: React.FC<JoinedRoomProps> = ({ route }) => {
             setComments(comments_data);
           } catch(error) {
             console.error(error);
+=======
+        if (videoId) {
+          const getComments = async () => {
+            try {
+              const comments_data = await fetchCommentsFromVideo(videoId);
+              setComments(comments_data);
+              setHaveComments(true);
+            } catch(error) {
+              console.error(error);
+              setHaveComments(false);
+            }
+>>>>>>> Stashed changes
           }
+          getComments();
+        } else {
+          setHaveComments(false); // assumed that if no param is passed in, the comments are being toggled OFF - thus clearing that we have comments
         }
+    };
 
+<<<<<<< Updated upstream
+=======
+    const sendComment = () => {
+      let newComment : Comment = {
+        commentId: generateUniqueId(),
+        content: madeComment,
+        userId: globalThis.userId,
+        timePosted: new Date().toISOString()
+      }
+
+      postComment(newComment);
+    };
+
+    const generateUniqueId = (): string => {
+      return Math.random().toString(36).substring(2, 11);
+>>>>>>> Stashed changes
     };
 
     return (
@@ -104,11 +175,15 @@ const JoinedRoomPage: React.FC<JoinedRoomProps> = ({ route }) => {
                     <Ionicons name='arrow-back-outline' size={30}/>
                 </TouchableOpacity>
                 <Text style={styles.titleText}>
+<<<<<<< Updated upstream
                     {roomContent}
+=======
+                    {room?.title}
+>>>>>>> Stashed changes
                 </Text>
             </View>
             <ScrollView style={{marginTop: 95}}>
-                <Text> Room Description </Text>
+                <Text> {room?.description} </Text>
                 {loading ? ( <ActivityIndicator size="large" color="#0000ff" /> ) : (
                         videoUrls.map((url, index) => (
                           <View>
@@ -142,19 +217,26 @@ const JoinedRoomPage: React.FC<JoinedRoomProps> = ({ route }) => {
                     </View>
                     <ScrollView>
                         <View> 
-                            {comments.map((comment, index) =>(
-                              <View style={styles.commentContainer}>
-                                <Text>{comment}</Text>
-                              </View>
-                            ))}
-                            <Text style={{marginTop: 10, marginLeft: 5}}> Empty for now </Text>
+                            {haveComments ?
+                              comments.map((comment, index) =>(
+                                <View style={styles.commentContainer}>
+                                  <Text>{comment.content}</Text>
+                                </View>
+                              ))
+                            : 
+                              <Text style={{marginTop: 10, marginLeft: 5}}> Empty for now </Text>
+                            }
+
                         </View>
                     </ScrollView>
                     <View style={styles.makeCommentContainer}>
                         <TextInput style={styles.input}
                             placeholder="Join the discussion"
+                            onChangeText={(text) => {
+                              setMadeComment(text);
+                            }}
                         />
-                        <TouchableOpacity>
+                        <TouchableOpacity onPress={() => sendComment()}>
                             <Text style={{marginRight: 10, marginTop: 5}}> Send </Text>
                         </TouchableOpacity>
                     </View>
