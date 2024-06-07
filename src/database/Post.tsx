@@ -92,18 +92,24 @@ export async function voteQuestion(questionId: string, userId: string, yes: bool
   firestore().runTransaction(async (transaction) => {
     let questionRef = firestore().collection(QUESTION_COLLECTION).doc(questionId);
     let questionDoc = await transaction.get(questionRef);
-    let userIds: string[] = questionDoc.get("userIds");
-    if (userIds.includes(userId)) {
+    console.log(`Question ${questionId} has ${questionDoc.get("yesVotes")} yes votes and ${questionDoc.get("noVotes")} no votes`);
+    let yesUserIds: string[] = questionDoc.get("yesUserIds");
+    let noUserIds: string[] = questionDoc.get("noUserIds");
+    console.log(`User ${userId} has voted on question ${questionId}: ${yesUserIds.includes(userId) || noUserIds.includes(userId)}`);
+    if (yesUserIds.includes(userId) || noUserIds.includes(userId)) {
       console.log(`User ${userId} has already voted on question ${questionId}`);
     } else {
       let yesVotes: number = questionDoc.get("yesVotes");
       let noVotes: number = questionDoc.get("noVotes");
       if (yes) {
+        console.log(`Incrementing yes votes for question ${questionId}`);
         transaction.update(questionRef, {"yesVotes": yesVotes + 1});
+        transaction.update(questionRef, {yesUserIds: arrayUnion(userId)});
       } else {
+        console.log(`Incrementing no votes for question ${questionId}`);
         transaction.update(questionRef, {"noVotes": noVotes + 1});
+        transaction.update(questionRef, {noUserIds: arrayUnion(userId)});
       }
-      transaction.update(questionRef, {userIds: arrayUnion(userId)});
     }
   });
 }
