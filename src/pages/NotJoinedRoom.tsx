@@ -1,10 +1,9 @@
-import React, { useState, useEffect, } from 'react';
-import {ScrollView, Text, StyleSheet, View, TouchableOpacity, Button, ActivityIndicator, Alert} from 'react-native';
+import React, { useState } from 'react';
+import {ScrollView, Text, StyleSheet, View, TouchableOpacity, ActivityIndicator, Alert} from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { RootStackParamList } from '../components/NavigationTypes';
 import { RouteProp, useNavigation, NavigationProp } from '@react-navigation/native';
 import { ImagePickerResponse, CameraOptions, launchCamera } from 'react-native-image-picker';
-import storage from '@react-native-firebase/storage';
 
 
 import { constructAndStoreVideo, postVideo, addVideoToRoom } from '../database/Post'; 

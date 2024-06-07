@@ -85,7 +85,6 @@ const JoinedRoomPage: React.FC<JoinedRoomProps> = ({ route }) => {
     useEffect(() => {
       firestore().collection(VIDEO_COLLECTION).onSnapshot(snapshot => {
         console.log('Video collection updated');
-        console.log('Comment video id: ', commentVideoId);
         if (!commentVideoId) return;
         console.log('Updating comments for video: ', commentVideoId);
         let updatedVideo = snapshot.docs.map(doc => doc.data() as VideoStruct).find(video => video.videoId === commentVideoId);

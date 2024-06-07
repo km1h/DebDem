@@ -4,9 +4,9 @@ import LinearGradient from 'react-native-linear-gradient';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../components/NavigationTypes';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { fetchAllQuestions, fetchWorld } from '../database/Fetch';
+import { fetchAllQuestions } from '../database/Fetch';
 import { postQuestion, voteQuestion, getRandomId } from '../database/Post';
-import { Question, World } from '../database/Structures';
+import { Question } from '../database/Structures';
 import firestore from '@react-native-firebase/firestore';
 
 import { QUESTION_COLLECTION } from '../database/Constants';

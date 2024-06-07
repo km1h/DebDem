@@ -1,10 +1,9 @@
 import storage from '@react-native-firebase/storage';
 import { FFmpegKit, ReturnCode } from 'ffmpeg-kit-react-native';
-import firestore, { updateDoc, arrayUnion } from '@react-native-firebase/firestore';
+import firestore, { arrayUnion } from '@react-native-firebase/firestore';
 
 import { VIDEO_STORAGE_DIRECTORY, VIDEO_COLLECTION, COMMENT_COLLECTION, ROOM_COLLECTION, QUESTION_COLLECTION, USER_COLLECTION, WORLD_COLLECTION, TEST_WORLD_ID } from './Constants';
-import { fetchRoom, fetchVideo } from './Fetch';
-import { Video, User, Room, World, Comment, Question } from './Structures';
+import { Video, User, Room, Comment, Question } from './Structures';
 
 export function getRandomId() {
   return Math.random().toString(36).substring(7);
@@ -92,10 +91,8 @@ export async function voteQuestion(questionId: string, userId: string, yes: bool
   firestore().runTransaction(async (transaction) => {
     let questionRef = firestore().collection(QUESTION_COLLECTION).doc(questionId);
     let questionDoc = await transaction.get(questionRef);
-    console.log(`Question ${questionId} has ${questionDoc.get("yesVotes")} yes votes and ${questionDoc.get("noVotes")} no votes`);
     let yesUserIds: string[] = questionDoc.get("yesUserIds");
     let noUserIds: string[] = questionDoc.get("noUserIds");
-    console.log(`User ${userId} has voted on question ${questionId}: ${yesUserIds.includes(userId) || noUserIds.includes(userId)}`);
     if (yesUserIds.includes(userId) || noUserIds.includes(userId)) {
       console.log(`User ${userId} has already voted on question ${questionId}`);
     } else {
