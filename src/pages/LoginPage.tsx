@@ -17,6 +17,8 @@ const LoginPage: React.FC<LoginPageProps> = ({ navigation }) => {
   const [rawPhoneNumber, setRawPhoneNumber] = useState<string>('');
   const [phoneNumber, setPhoneNumber] = useState<string>('');
   const phoneInput = useRef<PhoneInput>(null);
+  const [firstName, setFirstName] = useState<string>('');
+  const [lastName, setLastName] = useState<string>('');
 
   const [confirm, setConfirm] = useState<void | FirebaseAuthTypes.ConfirmationResult>();
   const [code, setConfirmationCode] = useState<string>('');
@@ -59,8 +61,8 @@ const LoginPage: React.FC<LoginPageProps> = ({ navigation }) => {
         postUser({
           "userId": user.uid,
           "phoneNumber": phoneNumber,
-          "firstName": "",
-          "lastName": ""
+          "firstName": firstName,
+          "lastName": lastName,
         });
       });
     }
@@ -88,6 +90,20 @@ const LoginPage: React.FC<LoginPageProps> = ({ navigation }) => {
           autoFocus
           containerStyle={{width: '100%'}}
         />
+        <View style={{flexDirection: 'row', justifyContent: 'space-evenly', marginTop: 10}}>
+          <TextInput style={styles.nameInput}
+            placeholder="First Name"
+            onChangeText={(text) => {
+              setFirstName(text);
+            }}
+          />
+          <TextInput style={styles.nameInput}
+            placeholder="Last Name"
+            onChangeText={(text) => {
+              setLastName(text);
+            }}
+          />
+        </View>
         
         <Pressable style={styles.loginButton} onPress={handleLogin}>
           <View>
@@ -136,6 +152,14 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     paddingLeft: 10,
     width: '100%',
+  },
+  nameInput: {
+    height: 40,
+    backgroundColor: 'rgba(119, 156, 171, 0.30)',
+    borderRadius: 10,
+    marginBottom: 10,
+    paddingLeft: 10,
+    width: '40%',
   },
   loginButton: {
     marginTop: 20,

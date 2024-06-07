@@ -30,6 +30,14 @@ export async function fetchAllRooms(): Promise<Room[]> {
   }));
 }
 
+export async function fetchAllQuestions(): Promise<Question[]> {
+  let world = await fetchWorld();
+  let questionIds: string[] = world.roomIds;
+  return await Promise.all(questionIds.map(async (questionId: string) => {
+    return fetchQuestion(questionId);
+  }));
+}
+
 export async function fetchVideo(videoId: string): Promise<Video> {
   let videoDoc = await firestore().collection("video").doc(videoId).get();
   return videoDoc.data() as Video;

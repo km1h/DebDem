@@ -6,8 +6,9 @@ import { RouteProp, useNavigation, NavigationProp } from '@react-navigation/nati
 import Modal from 'react-native-modal';
 import Video from 'react-native-video';
 
-import { fetchVideosFromRoom, fetchVideoDownloadURLs, fetchCommentsFromVideo } from '../database/Fetch';
-import { Video as VideoStruct, Comment } from '../database/Structures';
+import { fetchVideosFromRoom, fetchVideoDownloadURLs, fetchCommentsFromVideo, fetchUser, fetchRoom } from '../database/Fetch';
+import { Video as VideoStruct, Comment, User, Room } from '../database/Structures';
+import { postComment } from '../database/Post';
 
 type JoinedRoomRouteProp = RouteProp<RootStackParamList, 'JoinedRoomPage'>;
 type JoinedRoomNavigationProp = NavigationProp<RootStackParamList, 'JoinedRoomPage'>;
@@ -22,6 +23,10 @@ const JoinedRoomPage: React.FC<JoinedRoomProps> = ({ route }) => {
     const navigation = useNavigation<JoinedRoomNavigationProp>();
     const [videos, setVideos] = useState<VideoStruct[]>([]);
     const [comments, setComments] = useState<Comment[]>([]);
+    const [madeComment, setMadeComment] = useState<string>();
+
+    const [user, setUser] = useState<User>();
+    const [roomData, setRoomData] = useState<Room>();
 
     const [videoUrls, setVideoUrls] = useState<string[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
@@ -48,27 +53,84 @@ const JoinedRoomPage: React.FC<JoinedRoomProps> = ({ route }) => {
             setLoading(false);
           }
         };
+
+        const getUser = async () => {
+          try {
+            const data = await fetchUser(globalThis.userId);
+            console.log(data);
+    
+            if (!data) {
+              console.error('No user data found');
+              return;
+            }
+    
+            setUser(data);
+          } catch (error) {
+            console.error(error);
+          }
+        };
+
+        const getRoom = async () => {
+          try {
+            const data = await fetchRoom(roomId);
+            console.log(data);
+    
+            if (!data) {
+              console.error('No room data found');
+              return;
+            }
+    
+            setRoomData(data);
+          } catch (error) {
+            console.error(error);
+          }
+        };
         
         fetchVideos();
+        getUser();
+        getRoom();
       }, [roomId]);
 
     const handleGoBack = () => {
         navigation.goBack();
     };
 
-    const toggleComments = (videoId: string) => {
+    const toggleComments = (videoId?: string) => {
         setCommentsVisible(!commentsVisible)
         
-        const getComments = async () => {
-          try {
-            const comments_data = await fetchCommentsFromVideo(videoId);
-            setComments(comments_data);
-          } catch(error) {
-            console.error(error);
+        if (videoId) {
+          const getComments = async () => {
+            try {
+              const comments_data = await fetchCommentsFromVideo(videoId);
+              setComments(comments_data);
+            } catch(error) {
+              console.error(error);
+            }
           }
+          getComments();
+        } else {
+          console.error('invalid videoID');
         }
+    };
 
-        getComments();
+    const sendComment = async () => {
+      try {
+        await postComment({
+          commentId: generateUniqueId(),
+          content: madeComment,
+          userId: globalThis.userId,
+          timePosted: new Date().toISOString(),
+        });
+        console.log('Comment sent successfully');
+        // reset the input field
+        setMadeComment('');
+      } catch (error) {
+        console.error('Failed to send comment', error);
+      }
+    };
+
+    const generateUniqueId = (): string => {
+      return Math.random().toString(36).substring(2, 9);
     };
 
     return (
@@ -79,7 +141,7 @@ const JoinedRoomPage: React.FC<JoinedRoomProps> = ({ route }) => {
                 </TouchableOpacity>
             </View>
             <ScrollView style={{marginTop: 95}}>
-                <Text> Room Description </Text>
+                <Text> {roomData?.title} </Text>
                 {loading ? ( <ActivityIndicator size="large" color="#0000ff" /> ) : (
                         videoUrls.map((url, index) => (
                           <View>
@@ -115,7 +177,7 @@ const JoinedRoomPage: React.FC<JoinedRoomProps> = ({ route }) => {
                         <View> 
                             {comments.map((comment, index) =>(
                               <View style={styles.commentContainer}>
-                                <Text>{comment}</Text>
+                                <Text>{comment.content}</Text>
                               </View>
                             ))}
                             <Text style={{marginTop: 10, marginLeft: 5}}> Empty for now </Text>
@@ -124,8 +186,11 @@ const JoinedRoomPage: React.FC<JoinedRoomProps> = ({ route }) => {
                     <View style={styles.makeCommentContainer}>
                         <TextInput style={styles.input}
                             placeholder="Join the discussion"
+                            onChangeText={(text) => {
+                              setMadeComment(text);
+                            }}
                         />
-                        <TouchableOpacity>
+                        <TouchableOpacity onPress={sendComment}>
                             <Text style={{marginRight: 10, marginTop: 5}}> Send </Text>
                         </TouchableOpacity>
                     </View>

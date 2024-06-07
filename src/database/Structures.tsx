@@ -15,13 +15,13 @@ export interface Room {
 
 export interface Comment {
     commentId: string;
-    content: string;
+    content: string | undefined;
     userId: string;
     timePosted: string;
 }
 
 export interface Question {
-    questionId: string;
+    questionId: number;
     title: string;
     description: string;
     yesVotes: number;
@@ -41,4 +41,12 @@ export interface World {
     questionIds: string[];
     userIds: string[];
     roomIds: string[];
+}
+
+type MediaType = 'photo' | 'video';
+type VideoQuality = 'low' | 'medium' | 'high';
+
+export interface CameraOptions {
+  mediaType: MediaType;
+  videoQuality: VideoQuality;
 }

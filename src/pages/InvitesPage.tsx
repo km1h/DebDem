@@ -5,12 +5,21 @@ import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../components/NavigationTypes';
 import invitesData from '../data/invitedRooms.json';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { fetchAllRooms } from '../database/Fetch';
+import { Room } from '../database/Structures';
 
 type InvitesPageNavigationProp = NavigationProp<RootStackParamList, 'InvitesPage'>;
 
 const InvitesPage: React.FC = () => {
-    const [invites] = useState(invitesData.invites);
+    const [invites, setInvites] = useState<Room[]>([]);
     const navigation = useNavigation<InvitesPageNavigationProp>();
+
+    useEffect(() => {
+      let myUserId = globalThis.userId;
+      fetchAllRooms().then(rooms => {
+        setInvites(rooms.filter(room => !room.userIds.includes(myUserId)));
+      });
+    });
 
     const handleRoomPress = (roomId: string) => {
         navigation.navigate('NotJoinedRoomPage', {
@@ -36,13 +45,13 @@ const InvitesPage: React.FC = () => {
         </View>
         <ScrollView style={styles.scrollContainter}>
             {invites.map((room, index) => (
-            <TouchableOpacity style={styles.roomContainer} key={room.id} onPress={() => handleRoomPress(room.roomId)}>
+            <TouchableOpacity style={styles.roomContainer} key={room.roomId} onPress={() => handleRoomPress(room.roomId)}>
                 <LinearGradient
                     colors={['rgba(239, 198, 155, 0.60)', 'rgba(119, 156, 171, 0.10)', 'rgba(0, 0, 0, 0)']}
                     style={{height: 100, borderRadius: 10, width: '100%', justifyContent: 'space-between'}}
                 >
                     <Text style={styles.roomText}>
-                    {room.content}
+                    {room.title}
                     </Text>
                     <TouchableOpacity style={styles.uploadButton}>
                         <Text>Upload</Text>
