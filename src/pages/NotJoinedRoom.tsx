@@ -1,10 +1,13 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {ScrollView, Text, StyleSheet, View, TouchableOpacity, ActivityIndicator, Alert} from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { RootStackParamList } from '../components/NavigationTypes';
 import { RouteProp, useNavigation, NavigationProp } from '@react-navigation/native';
 import { ImagePickerResponse, CameraOptions, launchCamera } from 'react-native-image-picker';
 import Modal from 'react-native-modal';
+
+import { Room } from '../database/Structures';
+import { fetchRoom } from '../database/Fetch';
 
 
 import { constructAndStoreVideo, postVideo, addVideoToRoom } from '../database/Post'; 
@@ -19,8 +22,13 @@ interface NotJoinedRoomProps {
 const NotJoinedRoomPage: React.FC<NotJoinedRoomProps> = ({ route }) => {
     const roomId = route.params.data.roomId;
     const navigation = useNavigation<NotJoinedRoomNavigationProp>();
+    const [room, setRoom] = useState<Room>();
     const [uploading, setUploading] = useState(false);
     const [finishedUpload, setFinishedUpload] = useState(false);
+
+    useEffect(() => {
+      fetchRoom(roomId).then(setRoom);
+    } , []);
 
     const handleGoBack = () => {
         navigation.goBack();
@@ -76,11 +84,11 @@ const NotJoinedRoomPage: React.FC<NotJoinedRoomProps> = ({ route }) => {
                     <Ionicons name='arrow-back-outline' size={30}/>
                 </TouchableOpacity>
                 <Text style={styles.titleText}>
-                    Room
+                    {room.title}
                 </Text>
             </View>
             <ScrollView style={{marginTop: 95}}>
-               <Text>Description</Text>
+               <Text>{room.description}</Text>
             </ScrollView >
             <TouchableOpacity style={styles.uploadButton} onPress={recordVideo}>
                 <Text>Record</Text>
