@@ -17,6 +17,8 @@ export interface Comment {
     commentId: string;
     content: string | undefined;
     userId: string;
+    firstName?: string;
+    lastName?: string;
     timePosted: number;
 }
 

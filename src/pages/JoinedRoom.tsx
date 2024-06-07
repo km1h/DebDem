@@ -8,8 +8,8 @@ import Video from 'react-native-video';
 
 import firestore from '@react-native-firebase/firestore';
 
-import { fetchVideosFromRoom, fetchVideoDownloadURLs, fetchCommentsFromVideo, fetchRoom } from '../database/Fetch';
-import { Video as VideoStruct, Comment, Room } from '../database/Structures';
+import { fetchVideosFromRoom, fetchVideoDownloadURLs, fetchCommentsFromVideo, fetchRoom, fetchUser } from '../database/Fetch';
+import { Video as VideoStruct, Comment, Room, User } from '../database/Structures';
 import { getRandomId, postComment } from '../database/Post';
 import { VIDEO_COLLECTION } from '../database/Constants';
 
@@ -93,13 +93,28 @@ const JoinedRoomPage: React.FC<JoinedRoomProps> = ({ route }) => {
           return;
         }
         console.log('Fetching comments for video: ', updatedVideo.videoId)
-        fetchCommentsFromVideo(updatedVideo.videoId).then(setComments);
+        fetchCommentsFromVideo(updatedVideo.videoId).then(async (comments) => {
+          updateCommentUser(comments);
+        });
       });
+
+      const updateCommentUser = async (comments : Comment[]) => {
+        setComments(await Promise.all(comments.map(async (comment) => {
+          let user = await fetchUser(comment.userId);
+          let updatedComment = comment;
+          updatedComment.firstName = user.firstName;
+          updatedComment.lastName = user.lastName;
+          return updatedComment;
+        })));
+      }
+
     }, [commentVideoId]);
 
     const handleGoBack = () => {
         navigation.goBack();
     };
+
+
 
     const toggleComments = (videoId?: string) => {
       console.log('Toggling comments for video: ', videoId);
@@ -187,7 +202,9 @@ const JoinedRoomPage: React.FC<JoinedRoomProps> = ({ route }) => {
                       <View> 
                         {haveComments ?
                           comments.map((comment, index) =>(
+                            
                             <View key={comment.commentId} style={styles.commentContainer}>
+                              <Text style={{marginRight: 10}}>{comment.firstName}</Text>
                               <Text>{comment.content}</Text>
                             </View>
                           ))
@@ -266,7 +283,8 @@ const styles = StyleSheet.create({
   },
   commentContainer: {
     width: '80%',
-    marginBottom: 10
+    marginBottom: 10,
+    flexDirection: 'row'
   },
   input: {
     height: 30,
