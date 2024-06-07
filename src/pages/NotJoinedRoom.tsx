@@ -4,6 +4,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { RootStackParamList } from '../components/NavigationTypes';
 import { RouteProp, useNavigation, NavigationProp } from '@react-navigation/native';
 import { ImagePickerResponse, CameraOptions, launchCamera } from 'react-native-image-picker';
+import Modal from 'react-native-modal';
 
 
 import { constructAndStoreVideo, postVideo, addVideoToRoom } from '../database/Post'; 
@@ -19,6 +20,7 @@ const NotJoinedRoomPage: React.FC<NotJoinedRoomProps> = ({ route }) => {
     const roomId = route.params.data.roomId;
     const navigation = useNavigation<NotJoinedRoomNavigationProp>();
     const [uploading, setUploading] = useState(false);
+    const [finishedUpload, setFinishedUpload] = useState(false);
 
     const handleGoBack = () => {
         navigation.goBack();
@@ -63,7 +65,7 @@ const NotJoinedRoomPage: React.FC<NotJoinedRoomProps> = ({ route }) => {
       } else {
         Alert.alert('Upload failed', 'Sorry, something went wrong.');
       }
-
+      setFinishedUpload(true);
       setUploading(false);
     };
 
@@ -81,8 +83,23 @@ const NotJoinedRoomPage: React.FC<NotJoinedRoomProps> = ({ route }) => {
                <Text>Description</Text>
             </ScrollView >
             <TouchableOpacity style={styles.uploadButton} onPress={recordVideo}>
-                <Text>Upload</Text>
+                <Text>Record</Text>
                 {uploading && <ActivityIndicator size="large" color="#0000ff" />}
+                {finishedUpload && 
+                  <Modal
+                  isVisible={finishedUpload} 
+                  animationIn="slideInUp" 
+                  animationOut="slideOutDown" 
+                  style={styles.modalContainer}
+                  onBackdropPress={() => (
+                    setFinishedUpload(false)
+                  )}
+                  >
+                    <Text style={{padding: 5, alignSelf: 'center', fontSize: 25}}>
+                      Head over to your Joined Rooms to check out your video!
+                    </Text>
+                  </Modal>
+                }
             </TouchableOpacity>
         </View>
     );
@@ -116,7 +133,10 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     alignSelf: 'center',
     bottom: 35
-  }
+  }, 
+  modalContainer: {
+    paddingHorizontal: 20,
+  },
 });
 
 export default NotJoinedRoomPage;

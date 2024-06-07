@@ -52,9 +52,6 @@ const InvitesPage: React.FC = () => {
                     <Text style={styles.roomText}>
                     {room.title}
                     </Text>
-                    <TouchableOpacity style={styles.uploadButton}>
-                        <Text>Upload</Text>
-                    </TouchableOpacity>
                 </LinearGradient>
 
                 </TouchableOpacity>
@@ -93,17 +90,6 @@ const styles = StyleSheet.create({
     marginTop: 10,
     fontSize: 20
   },
-  uploadButton: {
-    borderColor: 'black',
-    borderWidth: 1,
-    width: '20%',
-    height: '25%',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(239, 198, 155, 0.60)',
-    borderRadius: 5,
-    alignSelf: 'center'
-  }
 });
 
 export default InvitesPage;

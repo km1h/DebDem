@@ -1,5 +1,5 @@
 import React, { useState, useEffect, } from 'react';
-import {ScrollView, Text, StyleSheet, View, TouchableOpacity, ActivityIndicator, TextInput} from 'react-native';
+import {ScrollView, Text, StyleSheet, View, TouchableOpacity, ActivityIndicator, TextInput, KeyboardAvoidingView} from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { RootStackParamList } from '../components/NavigationTypes';
 import { RouteProp, useNavigation, NavigationProp } from '@react-navigation/native';
@@ -177,8 +177,11 @@ const JoinedRoomPage: React.FC<JoinedRoomProps> = ({ route }) => {
                       controls={true}
                       resizeMode="contain"
                     />
-                    <TouchableOpacity onPress={() => toggleComments(videos[index].videoId)}>
-                      <Text> Comments </Text>
+                    <TouchableOpacity 
+                      onPress={() => toggleComments(videos[index].videoId)}
+                      style={styles.toggleCommentsBox}
+                    >
+                      <Text style={{color: 'white'}}> Comments </Text>
                     </TouchableOpacity>
                   </View>
                 ))
@@ -198,32 +201,41 @@ const JoinedRoomPage: React.FC<JoinedRoomProps> = ({ route }) => {
                             <Text style={{marginTop: 10, fontSize: 30, marginRight: 5}} > X </Text>
                         </TouchableOpacity>
                     </View>
-                    <ScrollView>
-                      <View> 
-                        {haveComments ?
-                          comments.map((comment, index) =>(
-                            
-                            <View key={comment.commentId} style={styles.commentContainer}>
-                              <Text style={{marginRight: 10}}>{comment.firstName}</Text>
-                              <Text>{comment.content}</Text>
-                            </View>
-                          ))
-                        : 
-                          <Text style={{marginTop: 10, marginLeft: 5}}> Empty for now </Text>
-                        }
+                      <ScrollView>
+                        <View> 
+                          {haveComments ?
+                            comments.map((comment, index) =>(
+                              
+                              <View key={comment.commentId} style={styles.commentContainer}>
+                                <Text style={{marginRight: 10, marginLeft: 5}}>{comment.firstName}:</Text>
+                                <Text>{comment.content}</Text>
+                              </View>
+                            ))
+                          : 
+                            <Text style={{marginTop: 10, marginLeft: 5}}> Empty for now </Text>
+                          }
+                        </View>
+                      </ScrollView>
+                    <KeyboardAvoidingView
+                     behavior="padding"
+                     style={{flex: 1}}
+                    >
+                      <View style={styles.makeCommentContainer}>
+                          <TextInput style={styles.input}
+                              placeholder="Join the discussion"
+                              onChangeText={(text) => {
+                                setMadeComment(text);
+                              }}
+                          />
+                          <TouchableOpacity 
+                            onPress={() => sendComment(commentVideoId)}
+                            style={styles.sendCommentButton}
+                          >
+                              <Text style={{marginRight: 10, marginTop: 7, alignSelf: 'center'}}> Send </Text>
+                          </TouchableOpacity>
                       </View>
-                    </ScrollView>
-                    <View style={styles.makeCommentContainer}>
-                        <TextInput style={styles.input}
-                            placeholder="Join the discussion"
-                            onChangeText={(text) => {
-                              setMadeComment(text);
-                            }}
-                        />
-                        <TouchableOpacity onPress={() => sendComment(commentVideoId)}>
-                            <Text style={{marginRight: 10, marginTop: 5}}> Send </Text>
-                        </TouchableOpacity>
-                    </View>
+                    </KeyboardAvoidingView>
+
                 </View>
             </Modal>
         </View>
@@ -284,6 +296,7 @@ const styles = StyleSheet.create({
   commentContainer: {
     width: '80%',
     marginBottom: 10,
+    marginTop: 5,
     flexDirection: 'row'
   },
   input: {
@@ -293,6 +306,22 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginBottom: 10,
     marginLeft: 10,
+  },
+  sendCommentButton: {
+    borderRadius: 10,
+    backgroundColor: 'rgb(75, 78, 109)',
+    height: 30,
+    width: 50,
+    marginRight: 10
+  },
+  toggleCommentsBox: {
+    backgroundColor: 'rgb(75, 78, 109)',
+    borderRadius: 10,
+    width: '25%',
+    justifyContent: 'center',
+    alignItems:'center',
+    height: '7%',
+    marginLeft: 8
   }
 });
 

@@ -1,10 +1,19 @@
 import React, { useState, useEffect, } from 'react';
-import {ScrollView, Text, View, StyleSheet} from 'react-native';
+import {ScrollView, Text, View, StyleSheet, TouchableOpacity} from 'react-native';
 import { fetchUser } from '../database/Fetch';
 import { User } from '../database/Structures';
+import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth';
+import { useNavigation, NavigationProp } from '@react-navigation/native';
+import { RootStackParamList } from '../components/NavigationTypes';
+type ProfilePageNavigationProp = NavigationProp<RootStackParamList, 'ProfilePage'>;
+
+interface ProfilePageProps {
+  navigation: ProfilePageNavigationProp;
+}
 
 const ProfilePage: React.FC = () => {
   const [user, setUser] = useState<User>();
+  const navigation = useNavigation<ProfilePageNavigationProp>();
 
   useEffect(() => {
     const getUser = async () => {
@@ -23,6 +32,19 @@ const ProfilePage: React.FC = () => {
     };
     getUser();
   }, []);
+
+  const handleLogout = async () => {
+    try {
+      await auth().signOut();
+
+      globalThis.userId = '';
+      navigation.navigate('LoginPage');
+
+      console.log('User signed out!');
+    } catch (error) {
+      console.error('Error signing out: ', error);
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -45,6 +67,9 @@ const ProfilePage: React.FC = () => {
           </View>
         </View>
         <Text style={{fontSize: 20, alignSelf: 'center'}}>{user?.phoneNumber}</Text>
+        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+          <Text style={styles.logoutButtonText}>Logout</Text>
+        </TouchableOpacity>
       </ScrollView>
     </View>
   );
@@ -78,7 +103,21 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     paddingLeft: 10,
     width: '40%',
-  }
+  },
+  logoutButton: {
+    marginTop: 20,
+    borderRadius: 10,
+    width: '25%',
+    height: '30%',
+    backgroundColor: 'rgb(75, 78, 109)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 20,
+    alignSelf:'center'
+  },
+  logoutButtonText: {
+    color: 'white',
+  },
 });
 
 export default ProfilePage;
