@@ -20,7 +20,9 @@ const LoginPage: React.FC<LoginPageProps> = ({ navigation }) => {
   const [firstName, setFirstName] = useState<string>('');
   const [lastName, setLastName] = useState<string>('');
 
+  // const [confirm, setConfirm] = useState<void | FirebaseAuthTypes.ConfirmationResult>();
   const [confirm, setConfirm] = useState<void | FirebaseAuthTypes.ConfirmationResult>();
+  const [verified, setVerified] = useState(false);
   const [code, setConfirmationCode] = useState<string>('');
 
   // Check if user is already logged in
@@ -44,6 +46,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ navigation }) => {
     .signInWithPhoneNumber(phoneNumber.toString())
     .catch((error: any) => Alert.alert('Invalid phone number.'));
     setConfirm(confirmation);
+    setVerified(true);
   };
 
   // Handle confirmation of phone number
@@ -64,11 +67,12 @@ const LoginPage: React.FC<LoginPageProps> = ({ navigation }) => {
           "firstName": firstName,
           "lastName": lastName
         });
+        setVerified(false);
       });
     }
   }
   
-  if (!confirm) {
+  if (!verified) {
     return (
       <View style={styles.container}>
         <Text style={styles.titleText}>
