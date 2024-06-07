@@ -7,43 +7,27 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { fetchAllQuestions, fetchWorld } from '../database/Fetch';
 import { postQuestion, voteQuestion, getRandomId } from '../database/Post';
 import { Question, World } from '../database/Structures';
-import { firebase } from '@react-native-firebase/storage';
+import firestore from '@react-native-firebase/firestore';
 
 import { QUESTION_COLLECTION } from '../database/Constants';
 
 type WorldPageNavigationProp = NavigationProp<RootStackParamList, 'WorldPage'>;
 
 const WorldPage: React.FC = () => {
-  const [world, setWorld] = useState<World>();
   const [questions, setQuestions] = useState<Question[]>([]);
   const [isPosting, setIsPosting] = useState(false);
   const [draft, setDraft] = useState('');
   const navigation = useNavigation<WorldPageNavigationProp>();
 
   useEffect(() => {
-    const loadWorldData = async () => {
-      try {
-        const data = await fetchWorld();
-        console.log(data);
-
-        if (!data) {
-          console.error('No data found');
-          return;
-        }
-        setWorld(data);
-      } catch (error) {
-        console.error(error);
-      }
-    };
-
-    loadWorldData();
     fetchAllQuestions().then(questions => {
+      console.log(questions);
       setQuestions(questions);
     });
   }, []);
 
   useEffect(() => {
-    firebase.firestore().collection(QUESTION_COLLECTION).onSnapshot(snapshot => {
+    firestore().collection(QUESTION_COLLECTION).onSnapshot(snapshot => {
       let updatedQuestions = snapshot.docs.map(doc => doc.data() as Question);
       setQuestions(updatedQuestions);
     });
@@ -143,7 +127,7 @@ const WorldPage: React.FC = () => {
               <TouchableOpacity onPress={() => upvote(question.questionId)}>
                   <Text style={{fontSize: 20, fontWeight: hasUpvoted(index) ? 'bold' : 'normal'}}> + </Text>
               </TouchableOpacity>
-              <Text> {question.yesVotes} </Text>
+              <Text> {question.yesVotes - question.noVotes} </Text>
               <TouchableOpacity onPress={() => downvote(question.questionId)}>
                   <Text style={{fontSize: 30, fontWeight: hasDownvoted(index) ? 'bold' : 'normal'}}> - </Text>
               </TouchableOpacity>

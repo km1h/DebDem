@@ -60,7 +60,7 @@ const NotJoinedRoomPage: React.FC<NotJoinedRoomProps> = ({ route }) => {
       let video = await constructAndStoreVideo(uri);
       if (video) {
         await postVideo(video);
-        await addVideoToRoom(roomId, video.videoId);
+        await addVideoToRoom(roomId, video.videoId, globalThis.userId);
       } else {
         Alert.alert('Upload failed', 'Sorry, something went wrong.');
       }

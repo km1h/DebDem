@@ -31,8 +31,11 @@ export async function fetchAllRooms(): Promise<Room[]> {
 }
 
 export async function fetchAllQuestions(): Promise<Question[]> {
+  console.log(`Fetching all questions`);
   let world = await fetchWorld();
+  console.log(`World: ${world}`);
   let questionIds: string[] = world.questionIds;
+  console.log(`Question IDs: ${questionIds}`);
   return await Promise.all(questionIds.map(async (questionId: string) => {
     return fetchQuestion(questionId);
   }));

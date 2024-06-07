@@ -6,9 +6,12 @@ import { RouteProp, useNavigation, NavigationProp } from '@react-navigation/nati
 import Modal from 'react-native-modal';
 import Video from 'react-native-video';
 
+import firestore from '@react-native-firebase/firestore';
+
 import { fetchVideosFromRoom, fetchVideoDownloadURLs, fetchCommentsFromVideo, fetchRoom } from '../database/Fetch';
 import { Video as VideoStruct, Comment, Room } from '../database/Structures';
 import { getRandomId, postComment } from '../database/Post';
+import { VIDEO_COLLECTION } from '../database/Constants';
 
 
 type JoinedRoomRouteProp = RouteProp<RootStackParamList, 'JoinedRoomPage'>;
@@ -24,6 +27,7 @@ const JoinedRoomPage: React.FC<JoinedRoomProps> = ({ route }) => {
     const navigation = useNavigation<JoinedRoomNavigationProp>();
 
     const [commentsVisible, setCommentsVisible] = useState(false);
+    const [commentVideoId, setCommentVideoId] = useState<string>();
     const [comments, setComments] = useState<Comment[]>([]);
     const [haveComments, setHaveComments] = useState(false);
     const [madeComment, setMadeComment] = useState<string>();
@@ -75,20 +79,44 @@ const JoinedRoomPage: React.FC<JoinedRoomProps> = ({ route }) => {
 
         getRoomData();
         fetchVideos();
-      }, [roomId]);
+    }, [roomId]);
+
+    // update comments
+    useEffect(() => {
+      firestore().collection(VIDEO_COLLECTION).onSnapshot(snapshot => {
+        console.log('Video collection updated');
+        console.log('Comment video id: ', commentVideoId);
+        if (!commentVideoId) return;
+        console.log('Updating comments for video: ', commentVideoId);
+        let updatedVideo = snapshot.docs.map(doc => doc.data() as VideoStruct).find(video => video.videoId === commentVideoId);
+        console.log('Updated video: ', updatedVideo);
+        if (!updatedVideo) {
+          return;
+        }
+        console.log('Fetching comments for video: ', updatedVideo.videoId)
+        fetchCommentsFromVideo(updatedVideo.videoId).then(setComments);
+      });
+    }, [commentVideoId]);
 
     const handleGoBack = () => {
         navigation.goBack();
     };
 
     const toggleComments = (videoId?: string) => {
+      console.log('Toggling comments for video: ', videoId);
         setCommentsVisible(!commentsVisible)
+        console.log('Comments visible: ', commentsVisible)
         
         if (videoId) {
           const getComments = async () => {
             try {
+              console.log('Fetching comments for video: ', videoId)
               const comments_data = await fetchCommentsFromVideo(videoId);
+              console.log('Comments for video: ', comments_data);
               setComments(comments_data);
+              console.log('Comments: ', comments);
+              setCommentVideoId(videoId);
+              console.log('Comment video id: ', commentVideoId);
               setHaveComments(true);
             } catch(error) {
               console.error(error);
@@ -101,7 +129,9 @@ const JoinedRoomPage: React.FC<JoinedRoomProps> = ({ route }) => {
         }
     };
 
-    const sendComment = () => {
+    const sendComment = (videoId?: string) => {
+      if (!videoId) return;
+      
       let newComment : Comment = {
         commentId: getRandomId(),
         content: madeComment,
@@ -109,7 +139,7 @@ const JoinedRoomPage: React.FC<JoinedRoomProps> = ({ route }) => {
         timePosted: Date.now(),
       }
 
-      postComment(newComment);
+      postComment(newComment, videoId);
     };
 
     return (
@@ -174,7 +204,7 @@ const JoinedRoomPage: React.FC<JoinedRoomProps> = ({ route }) => {
                               setMadeComment(text);
                             }}
                         />
-                        <TouchableOpacity onPress={() => sendComment()}>
+                        <TouchableOpacity onPress={() => sendComment(commentVideoId)}>
                             <Text style={{marginRight: 10, marginTop: 5}}> Send </Text>
                         </TouchableOpacity>
                     </View>

@@ -4,8 +4,11 @@ import LinearGradient from 'react-native-linear-gradient';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../components/NavigationTypes';
 
+import firestore from '@react-native-firebase/firestore';
+
 import { fetchAllRooms } from '../database/Fetch';
 import { Room } from '../database/Structures';
+import { ROOM_COLLECTION } from '../database/Constants';
 
 type JoinedRoomsPageNavigationProp = NavigationProp<RootStackParamList, 'JoinedRoomsPage'>;
 
@@ -28,6 +31,13 @@ const RoomsPage: React.FC = () => {
     let myUserId = globalThis.userId;
     fetchAllRooms().then(rooms => {
       setJoinedRooms(rooms.filter(room => room.userIds.includes(myUserId)));
+    });
+  }, []);
+
+  useEffect(() => {
+    firestore().collection(ROOM_COLLECTION).onSnapshot(snapshot => {
+      let joinedRooms = snapshot.docs.map(doc => doc.data() as Room).filter(room => room.userIds.includes(globalThis.userId));
+      setJoinedRooms(joinedRooms);
     });
   }, []);
 
