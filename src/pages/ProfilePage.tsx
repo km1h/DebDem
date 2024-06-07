@@ -37,10 +37,14 @@ const ProfilePage: React.FC = () => {
           justifyContent: 'space-evenly',
           marginBottom: 20
         }}>
-          <Text style={styles.nameContainer}>{user?.firstName}</Text>
-          <Text style={styles.nameContainer}>{user?.lastName}</Text>
+          <View style={styles.nameContainer}> 
+            <Text style={{fontSize: 20, alignSelf: 'center'}}>{user?.firstName}</Text>
+          </View>
+          <View style={styles.nameContainer}> 
+            <Text style={{fontSize: 20, alignSelf: 'center'}}>{user?.lastName}</Text>
+          </View>
         </View>
-        <Text style={{alignSelf: 'center'}}>{user?.phoneNumber}</Text>
+        <Text style={{fontSize: 20, alignSelf: 'center'}}>{user?.phoneNumber}</Text>
       </ScrollView>
     </View>
   );
@@ -67,6 +71,7 @@ const styles = StyleSheet.create({
     marginTop: 80,
   },
   nameContainer: {
+    flexDirection: 'row',
     height: 40,
     backgroundColor: 'rgba(119, 156, 171, 0.30)',
     borderRadius: 10,

@@ -93,7 +93,8 @@ const LoginPage: React.FC<LoginPageProps> = ({ navigation }) => {
         <View style={{
           flexDirection: 'row',
           marginTop: 20,
-          justifyContent: 'space-evenly'
+          justifyContent: 'space-between',
+          width: '100%'
         }}>
           <TextInput style={styles.nameInput}
             placeholder="First Name"
