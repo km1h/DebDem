@@ -7,6 +7,8 @@ import { ImagePickerResponse, launchCamera } from 'react-native-image-picker';
 import storage from '@react-native-firebase/storage';
 import { CameraOptions } from '../database/Structures';
 
+import { constructAndStoreVideo, postVideo, addVideoToRoom } from '../database/Post'; 
+
 type NotJoinedRoomRouteProp = RouteProp<RootStackParamList, 'NotJoinedRoomPage'>;
 type NotJoinedRoomNavigationProp = NavigationProp<RootStackParamList, 'NotJoinedRoomPage'>;
 
@@ -15,7 +17,7 @@ interface NotJoinedRoomProps {
 }
 
 const NotJoinedRoomPage: React.FC<NotJoinedRoomProps> = ({ route }) => {
-    const roomId = route.params.data.roomId // for future use when pulling room specific data from backend
+    const roomId = route.params.data.roomId;
     const navigation = useNavigation<NotJoinedRoomNavigationProp>();
     const [uploading, setUploading] = useState(false);
 
@@ -36,33 +38,24 @@ const NotJoinedRoomPage: React.FC<NotJoinedRoomProps> = ({ route }) => {
           console.log('Video recording error: ', response.errorCode);
         } else if (response.assets && response.assets.length > 0) {
           const videoUri = response.assets[0].uri;
-          uploadVideo(videoUri);
+          if (videoUri) {
+            uploadVideo(videoUri);
+          }
         }
       });
     };
 
     const uploadVideo = async (uri: string) => {
       setUploading(true);
-      const fileName = uri.substring(uri.lastIndexOf('/') + 1);
-      const reference = storage().ref(`videos/${fileName}`);  // assuming this is how the video urls are stored
-  
-      try {
-        const task = reference.putFile(uri);
-  
-        task.on('state_changed', (snapshot) => {
-          console.log(
-            `${snapshot.bytesTransferred} transferred out of ${snapshot.totalBytes}`
-          );
-        });
-  
-        await task;
-        const url = await reference.getDownloadURL();
-        Alert.alert('Video uploaded!', `Video URL: ${url}`);
-      } catch (e) {
-        console.error(e);
+
+      let video = await constructAndStoreVideo(uri);
+      if (video) {
+        await postVideo(video);
+        await addVideoToRoom(roomId, video.videoId);
+      } else {
         Alert.alert('Upload failed', 'Sorry, something went wrong.');
       }
-  
+
       setUploading(false);
     };
 

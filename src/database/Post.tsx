@@ -71,12 +71,12 @@ export async function postQuestion(question: Question) {
   await questionRef.set(question);
 }
 
-export function addVideoToRoom(roomId: string, videoId: string) {
+export async function addVideoToRoom(roomId: string, videoId: string) {
   console.log(`Adding video ${videoId} to room ${roomId}`);
 
   // fetch videos from room
   let roomRef = firestore().collection("rooms").doc(roomId);
-  roomRef.update({"videoIds": arrayUnion([videoId])});
+  await roomRef.update({"videoIds": arrayUnion([videoId])});
 }
 
 export async function voteQuestion(questionId: string, userId: string, yes: boolean) {

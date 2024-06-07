@@ -4,7 +4,6 @@ import LinearGradient from 'react-native-linear-gradient';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../components/NavigationTypes';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import postsData from '../data/posts.json'
 import { fetchAllQuestions, fetchWorld } from '../database/Fetch';
 import { Question, World } from '../database/Structures';
 

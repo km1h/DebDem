@@ -35,19 +35,19 @@ const JoinedRoomPage: React.FC<JoinedRoomProps> = ({ route }) => {
     useEffect(() => {
         const fetchVideos = async () => {
           try {
-            const video_data = await fetchVideosFromRoom(roomId);
-            console.log(video_data);
+            const videos = await fetchVideosFromRoom(roomId);
+            console.log(videos);
 
-            if (!video_data) {
+            if (!videos) {
               console.error('No video paths found');
               setVideoUrls([]);
               setLoading(false);
               return;
             }
 
-            const urls = await fetchVideoDownloadURLs(video_data.videos.paths);
+            const urls = await fetchVideoDownloadURLs(videos);
             setVideoUrls(urls);
-            setVideos(video_data.videos);
+            setVideos(videos);
             setLoading(false);
           } catch (error) {
             console.error(error);
@@ -126,24 +126,23 @@ const JoinedRoomPage: React.FC<JoinedRoomProps> = ({ route }) => {
                 </Text>
             </View>
             <ScrollView style={{marginTop: 95}}>
-                <Text> {room?.description} </Text>
-                {loading ? ( <ActivityIndicator size="large" color="#0000ff" /> ) : (
-                        videoUrls.map((url, index) => (
-                          <View>
-                            <Video
-                              key={index}
-                              source={{ uri: url }}
-                              style={styles.video}
-                              controls={true}
-                              resizeMode="contain"
-                            />
-                            <TouchableOpacity onPress={() => toggleComments(videos.video.id)}>
-                              <Text> Comments </Text>
-                            </TouchableOpacity>
-                          </View>
-                        )))
-                  }
-            </ScrollView >
+              <Text> {room?.description} </Text>
+              {loading ? ( <ActivityIndicator size="large" color="#0000ff" /> ) : (
+                videoUrls.map((url, index) => (
+                  <View key={url}>
+                    <Video
+                      source={{ uri: url }}
+                      style={styles.video}
+                      controls={true}
+                      resizeMode="contain"
+                    />
+                    <TouchableOpacity onPress={() => toggleComments(videos[index].videoId)}>
+                      <Text> Comments </Text>
+                    </TouchableOpacity>
+                  </View>
+                ))
+              )}
+            </ScrollView>
             <Modal
                 isVisible={commentsVisible} 
                 animationIn="slideInUp" 
@@ -159,18 +158,17 @@ const JoinedRoomPage: React.FC<JoinedRoomProps> = ({ route }) => {
                         </TouchableOpacity>
                     </View>
                     <ScrollView>
-                        <View> 
-                            {haveComments ?
-                              comments.map((comment, index) =>(
-                                <View style={styles.commentContainer}>
-                                  <Text>{comment.content}</Text>
-                                </View>
-                              ))
-                            : 
-                              <Text style={{marginTop: 10, marginLeft: 5}}> Empty for now </Text>
-                            }
-
-                        </View>
+                      <View> 
+                        {haveComments ?
+                          comments.map((comment, index) =>(
+                            <View key={comment.commentId} style={styles.commentContainer}>
+                              <Text>{comment.content}</Text>
+                            </View>
+                          ))
+                        : 
+                          <Text style={{marginTop: 10, marginLeft: 5}}> Empty for now </Text>
+                        }
+                      </View>
                     </ScrollView>
                     <View style={styles.makeCommentContainer}>
                         <TextInput style={styles.input}
