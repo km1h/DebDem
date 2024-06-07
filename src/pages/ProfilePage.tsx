@@ -22,7 +22,7 @@ const ProfilePage: React.FC = () => {
       }
     };
     getUser();
-  });
+  }, []);
 
   return (
     <View style={styles.container}>

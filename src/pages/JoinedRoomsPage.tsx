@@ -12,6 +12,7 @@ type JoinedRoomsPageNavigationProp = NavigationProp<RootStackParamList, 'JoinedR
 
 const RoomsPage: React.FC = () => {
   const [joinedRooms, setJoinedRooms] = useState<Room[]>([]);
+  const [time, setTime] = useState<number>(0);
 
   const navigation = useNavigation<JoinedRoomsPageNavigationProp>();
 
@@ -28,8 +29,21 @@ const RoomsPage: React.FC = () => {
     fetchAllRooms().then(rooms => {
       setJoinedRooms(rooms.filter(room => room.userIds.includes(myUserId)));
     });
-  });
+  }, []);
 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTime(Date.now());
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const countdown = (timeInitialized: number) => {
+    let date = new Date(timeInitialized + 1000*60*60*24*7 - time);
+    return date.toUTCString().split(' ')[4];
+  }
+  
   return (
     <View style={styles.container}>
       <View style={styles.titleBox}>
@@ -49,7 +63,7 @@ const RoomsPage: React.FC = () => {
                   {room.title}
                 </Text>
                 <Text style={styles.timerText}>
-                  Time Remaining: {room.timeInitialized + 1000*60*60*24*7 - Date.now()}
+                  Time Remaining: {countdown(room.timeInitialized)}
                 </Text>
               </LinearGradient>
 

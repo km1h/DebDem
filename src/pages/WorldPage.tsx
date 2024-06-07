@@ -8,7 +8,6 @@ import { fetchAllQuestions, fetchWorld } from '../database/Fetch';
 import { postQuestion, voteQuestion, getRandomId } from '../database/Post';
 import { Question, World } from '../database/Structures';
 import { firebase } from '@react-native-firebase/storage';
-import { firestore } from 'firebase-admin';
 
 import { QUESTION_COLLECTION } from '../database/Constants';
 
@@ -41,14 +40,14 @@ const WorldPage: React.FC = () => {
     fetchAllQuestions().then(questions => {
       setQuestions(questions);
     });
-  });
+  }, []);
 
   useEffect(() => {
-    firestore().collection(QUESTION_COLLECTION).onSnapshot(snapshot => {
+    firebase.firestore().collection(QUESTION_COLLECTION).onSnapshot(snapshot => {
       let updatedQuestions = snapshot.docs.map(doc => doc.data() as Question);
       setQuestions(updatedQuestions);
     });
-  });
+  }, []);
 
   const hasUpvoted = (questionIndex: number) => {
     return questions[questionIndex].yesUserIds.includes(globalThis.userId);

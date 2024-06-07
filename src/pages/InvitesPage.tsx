@@ -18,7 +18,7 @@ const InvitesPage: React.FC = () => {
       fetchAllRooms().then(rooms => {
         setInvites(rooms.filter(room => !room.userIds.includes(myUserId)));
       });
-    });
+    }, []);
 
     const handleRoomPress = (roomId: string) => {
         navigation.navigate('NotJoinedRoomPage', {
