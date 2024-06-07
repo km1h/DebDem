@@ -5,48 +5,22 @@ import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../components/NavigationTypes';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { fetchAllQuestions, fetchWorld } from '../database/Fetch';
+import { postQuestion, voteQuestion, getRandomId } from '../database/Post';
 import { Question, World } from '../database/Structures';
+import { firebase } from '@react-native-firebase/storage';
+import { firestore } from 'firebase-admin';
 
-// TODO put elsewhere
-import { FFmpegKit, ReturnCode } from 'ffmpeg-kit-react-native';
-import storage from '@react-native-firebase/storage';
-
-
-function uploadVideo(roomId: string, videoFile: string) {
-  // upload video to backend
-  console.log(`Uploading video ${videoFile} to room ${roomId}`);
-
-  // Execute FFmpeg command
-  console.log(`Compressing video ${videoFile}`);
-
-  FFmpegKit.execute(`-y -i /Users/colinsullivan/Desktop/Mirror/StanfordStuff/CS278/DebDem/src/img/video.mp4 -r 30 -c:v libx264 -vf scale=256:384 -aspect 2:3 -t 60s /Users/colinsullivan/Desktop/Mirror/StanfordStuff/CS278/DebDem/src/img/compressed_video.mp4`).then(async (session) => {
-      const returnCode = await session.getReturnCode();
-      if (ReturnCode.isSuccess(returnCode)) {
-        console.log(`Compression completed successfully`);
-        console.log("Uploading compressed video to backend");
-        storage().ref(`/Test/compressed_video1.mp4`).putFile(`/Users/colinsullivan/Desktop/Mirror/StanfordStuff/CS278/DebDem/src/img/compressed_video.mp4`).then(() => {
-          console.log(`Video uploaded successfully`);
-        });
-      } else if (ReturnCode.isCancel(returnCode)) {
-          console.log(`Compression was cancelled`);
-      } else {
-          console.log(`Compression failed. Please check the logs for the details.`);
-      }
-  });
-}
+import { QUESTION_COLLECTION } from '../database/Constants';
 
 type WorldPageNavigationProp = NavigationProp<RootStackParamList, 'WorldPage'>;
 
 const WorldPage: React.FC = () => {
   const [world, setWorld] = useState<World>();
-  const [posts, setPosts] = useState<Question[]>([]);
+  const [questions, setQuestions] = useState<Question[]>([]);
   const [isPosting, setIsPosting] = useState(false);
   const [draft, setDraft] = useState('');
-  const [hasUpvoted, setHasUpvoted] = useState(false); // TODO: update these from the backend
-  const [hasDownvoted, setHasDownvoted] = useState(false);
   const navigation = useNavigation<WorldPageNavigationProp>();
 
-  
   useEffect(() => {
     const loadWorldData = async () => {
       try {
@@ -65,41 +39,55 @@ const WorldPage: React.FC = () => {
 
     loadWorldData();
     fetchAllQuestions().then(questions => {
-      setPosts(questions);
+      setQuestions(questions);
     });
-    
   });
-  
-  
-  const upvote = (postId: number) => {
-    const update = hasUpvoted ? -1 : 1;
-    const updatedPosts = posts.map(post => {
-      if (post.questionId === postId) {
-        return {...post, count: post.yesVotes + update };
-      }
-      return post
-    });
-    setPosts(updatedPosts);
-    setHasUpvoted(!hasUpvoted);
-    setHasDownvoted(false);
-  }
 
   useEffect(() => {
-    // console.log(require('../img/user1.jpeg'));
-    uploadVideo('1', "");
+    firestore().collection(QUESTION_COLLECTION).onSnapshot(snapshot => {
+      let updatedQuestions = snapshot.docs.map(doc => doc.data() as Question);
+      setQuestions(updatedQuestions);
+    });
   });
 
-  const downvote = (postId: number) => {
-    const update = hasDownvoted ? 1 : -1;
-    const updatedPosts = posts.map(post => {
-      if (post.questionId === postId) {
-        return { ...post, count: post.yesVotes + update };
+  const hasUpvoted = (questionIndex: number) => {
+    return questions[questionIndex].yesUserIds.includes(globalThis.userId);
+  }
+
+  const hasDownvoted = (questionIndex: number) => {
+    return questions[questionIndex].noUserIds.includes(globalThis.userId);
+  }
+
+  const changeVotes = (questionId: string, yes: boolean) => {
+    let questionIndex = questions.findIndex(question => question.questionId === questionId);
+    if (hasUpvoted(questionIndex) || hasDownvoted(questionIndex)) {
+      return;
+    }
+    let myUserId = globalThis.userId;
+    voteQuestion(questionId, myUserId, yes);
+    const updatedQuestions = questions.map(question => {
+      if (question.questionId === questionId) {
+        let updatedQuestion = question;
+        if (yes) {
+          updatedQuestion.yesUserIds.push(myUserId);
+          updatedQuestion.yesVotes += 1;
+        } else {
+          updatedQuestion.noUserIds.push(myUserId);
+          updatedQuestion.noVotes += 1;
+        }
+        return updatedQuestion;
       }
-      return post
+      return question;
     });
-    setPosts(updatedPosts);
-    setHasDownvoted(!hasDownvoted);
-    setHasUpvoted(false);
+    setQuestions(updatedQuestions);
+  }
+  
+  const upvote = (questionId: string) => {
+    changeVotes(questionId, true);
+  }
+
+  const downvote = (questionId: string) => {
+    changeVotes(questionId, false);
   }
 
   const makePostButton = () => {
@@ -108,14 +96,16 @@ const WorldPage: React.FC = () => {
 
   const makePost = (content: string) => {
     const newPost = {
-      questionId: posts.length,
+      questionId: getRandomId(),
       title: content,
       description: '',
       noVotes: 0,
       yesVotes: 0,
-      userIds: []
+      yesUserIds: [],
+      noUserIds: [],
     };
-    setPosts([...posts, newPost]);
+    postQuestion(newPost);
+    setQuestions([...questions, newPost]);
   }
 
   const handleNotifPress = () => {
@@ -138,8 +128,8 @@ const WorldPage: React.FC = () => {
       />
       <ScrollView style={styles.scrollContainer}>
 
-        {posts.map((post, index) => (
-          <View style={styles.postContatiner} key={post.questionId}>
+        {questions.map((question, index) => (
+          <View style={styles.postContatiner} key={question.questionId}>
             <LinearGradient
               start={{x: 0, y: 0}} 
               end={{x: 1, y: 0}}
@@ -147,16 +137,16 @@ const WorldPage: React.FC = () => {
               style={{height: 50, borderRadius: 10, width: '80%'}}
             >
               <Text style={styles.postText}>
-                {post.title}
+                {question.title}
               </Text>
             </LinearGradient>
             <View style={styles.interactables}>
-              <TouchableOpacity onPress={() => upvote(post.questionId)}>
-                  <Text style={{fontSize: 20, fontWeight: hasUpvoted ? 'bold' : 'normal'}}> + </Text>
+              <TouchableOpacity onPress={() => upvote(question.questionId)}>
+                  <Text style={{fontSize: 20, fontWeight: hasUpvoted(index) ? 'bold' : 'normal'}}> + </Text>
               </TouchableOpacity>
-              <Text> {post.yesVotes} </Text>
-              <TouchableOpacity onPress={() => downvote(post.questionId)}>
-                  <Text style={{fontSize: 30, fontWeight: hasDownvoted ? 'bold' : 'normal'}}> - </Text>
+              <Text> {question.yesVotes} </Text>
+              <TouchableOpacity onPress={() => downvote(question.questionId)}>
+                  <Text style={{fontSize: 30, fontWeight: hasDownvoted(index) ? 'bold' : 'normal'}}> - </Text>
               </TouchableOpacity>
             </View>
           </View>

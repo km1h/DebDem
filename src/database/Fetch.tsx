@@ -1,7 +1,7 @@
 import storage from '@react-native-firebase/storage';
 import firestore from '@react-native-firebase/firestore';
 
-import { TEST_WORLD_ID } from './Constants';
+import { TEST_WORLD_ID, VIDEO_COLLECTION, QUESTION_COLLECTION, WORLD_COLLECTION, ROOM_COLLECTION, COMMENT_COLLECTION, USER_COLLECTION } from './Constants';
 import { Video, World, Room, Comment, Question, User } from './Structures';
 
 export async function fetchVideosFromRoom(roomId: string): Promise<Video[]> {
@@ -39,38 +39,38 @@ export async function fetchAllQuestions(): Promise<Question[]> {
 }
 
 export async function fetchVideo(videoId: string): Promise<Video> {
-  let videoDoc = await firestore().collection("video").doc(videoId).get();
+  let videoDoc = await firestore().collection(VIDEO_COLLECTION).doc(videoId).get();
   return videoDoc.data() as Video;
 }
 
 export async function fetchWorld(): Promise<World> {
-  let worldDoc = await firestore().collection("world").doc(TEST_WORLD_ID).get();
+  let worldDoc = await firestore().collection(WORLD_COLLECTION).doc(TEST_WORLD_ID).get();
   return worldDoc.data() as World;
 }
 
 export async function fetchRoom(roomId: string) {
-  let roomDoc = await firestore().collection("room").doc(roomId).get();
+  let roomDoc = await firestore().collection(ROOM_COLLECTION).doc(roomId).get();
   return roomDoc.data() as Room;
 }
 
 export async function fetchComment(commentId: string) {
-  let commentDoc = await firestore().collection("comment").doc(commentId).get();
+  let commentDoc = await firestore().collection(COMMENT_COLLECTION).doc(commentId).get();
   return commentDoc.data() as Comment;
 }
 
 export async function fetchQuestion(questionId: string) {
-  let questionDoc = await firestore().collection("question").doc(questionId).get();
+  let questionDoc = await firestore().collection(QUESTION_COLLECTION).doc(questionId).get();
   return questionDoc.data() as Question;
 }
 
 export async function fetchUser(userId: string) {
-  let userDoc = await firestore().collection("user").doc(userId).get();
+  let userDoc = await firestore().collection(USER_COLLECTION).doc(userId).get();
   return userDoc.data() as User;
 }
 
 export async function fetchVideoDownloadURLs(videos: Video[]): Promise<string[]> {
   let uris = videos.map((video: Video) => { return video.videoURI; });
-  return Promise.all(uris.map(async (uri: string) => {
-    return await storage().ref(uri).getDownloadURL();
+  return Promise.all(uris.map(async (uri: string | undefined) => {
+    return storage().ref(uri).getDownloadURL();
   }));
 }

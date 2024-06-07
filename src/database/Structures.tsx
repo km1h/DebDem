@@ -17,16 +17,17 @@ export interface Comment {
     commentId: string;
     content: string | undefined;
     userId: string;
-    timePosted: string;
+    timePosted: number;
 }
 
 export interface Question {
-    questionId: number;
+    questionId: string;
     title: string;
     description: string;
     yesVotes: number;
     noVotes: number;
-    userIds: string[];
+    yesUserIds: string[];
+    noUserIds: string[];
 }
 
 export interface User {

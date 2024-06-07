@@ -8,7 +8,7 @@ import Video from 'react-native-video';
 
 import { fetchVideosFromRoom, fetchVideoDownloadURLs, fetchCommentsFromVideo, fetchRoom } from '../database/Fetch';
 import { Video as VideoStruct, Comment, Room } from '../database/Structures';
-import { postComment } from '../database/Post';
+import { getRandomId, postComment } from '../database/Post';
 
 
 type JoinedRoomRouteProp = RouteProp<RootStackParamList, 'JoinedRoomPage'>;
@@ -19,7 +19,7 @@ interface JoinedRoomProps {
 }
 
 const JoinedRoomPage: React.FC<JoinedRoomProps> = ({ route }) => {
-    const roomId = route.params.data.roomId // for future use when pulling room specific data from backend
+    const roomId = route.params.data.roomId
     const [room, setRoom] = useState<Room>()
     const navigation = useNavigation<JoinedRoomNavigationProp>();
 
@@ -102,17 +102,13 @@ const JoinedRoomPage: React.FC<JoinedRoomProps> = ({ route }) => {
 
     const sendComment = () => {
       let newComment : Comment = {
-        commentId: generateUniqueId(),
+        commentId: getRandomId(),
         content: madeComment,
         userId: globalThis.userId,
-        timePosted: new Date().toISOString()
+        timePosted: Date.now(),
       }
 
       postComment(newComment);
-    };
-
-    const generateUniqueId = (): string => {
-      return Math.random().toString(36).substring(2, 11);
     };
 
     return (
