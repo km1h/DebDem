@@ -6,7 +6,7 @@ import { Video, World, Room, Comment, Question, User } from './Structures';
 
 export async function fetchVideosFromRoom(roomId: string): Promise<Video[]> {
   console.log(`Fetching videos from room ${roomId}`);
-  const roomDoc = await firestore().collection("room").doc(roomId).get();
+  const roomDoc = await firestore().collection(ROOM_COLLECTION).doc(roomId).get();
   let videoIds: string[] = roomDoc.get("videoIds");
   return await Promise.all(videoIds.map(async (videoId: string) => {
     return fetchVideo(videoId);
@@ -15,7 +15,7 @@ export async function fetchVideosFromRoom(roomId: string): Promise<Video[]> {
 
 export async function fetchCommentsFromVideo(videoId: string): Promise<Comment[]> {
   console.log(`Fetching comments from video ${videoId}`);
-  const videoDoc = await firestore().collection("video").doc(videoId).get();
+  const videoDoc = await firestore().collection(VIDEO_COLLECTION).doc(videoId).get();
   let commentIds: string[] = videoDoc.get("commentIds");
   return await Promise.all(commentIds.map(async (commentId: string) => {
     return fetchComment(commentId);

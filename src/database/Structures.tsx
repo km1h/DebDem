@@ -43,11 +43,3 @@ export interface World {
     userIds: string[];
     roomIds: string[];
 }
-
-export type MediaType = 'video';
-export type VideoQuality = 'medium';
-
-export interface CameraOptions {
-  mediaType: MediaType;
-  videoQuality: VideoQuality;
-}

@@ -36,6 +36,7 @@ const JoinedRoomPage: React.FC<JoinedRoomProps> = ({ route }) => {
         const fetchVideos = async () => {
           try {
             const videos = await fetchVideosFromRoom(roomId);
+            console.log("retrieved videos")
             console.log(videos);
 
             if (!videos) {

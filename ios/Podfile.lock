@@ -2376,6 +2376,8 @@ PODS:
     - RNFBApp
   - RNOS (1.2.6):
     - React
+  - RNPermissions (4.1.5):
+    - React-Core
   - RNScreens (3.31.1):
     - DoubleConversion
     - glog
@@ -2492,6 +2494,7 @@ DEPENDENCIES:
   - "RNFBFirestore (from `../node_modules/@react-native-firebase/firestore`)"
   - "RNFBStorage (from `../node_modules/@react-native-firebase/storage`)"
   - RNOS (from `../node_modules/react-native-os`)
+  - RNPermissions (from `../node_modules/react-native-permissions`)
   - RNScreens (from `../node_modules/react-native-screens`)
   - RNVectorIcons (from `../node_modules/react-native-vector-icons`)
   - TcpSockets (from `../node_modules/react-native-tcp`)
@@ -2655,6 +2658,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@react-native-firebase/storage"
   RNOS:
     :path: "../node_modules/react-native-os"
+  RNPermissions:
+    :path: "../node_modules/react-native-permissions"
   RNScreens:
     :path: "../node_modules/react-native-screens"
   RNVectorIcons:
@@ -2752,12 +2757,13 @@ SPEC CHECKSUMS:
   RNFBFirestore: 974889969da6539c48d17b1e8f66e4125e3d0211
   RNFBStorage: d2da22d7168baf5109050f0f79dcb00ca0f49881
   RNOS: 6f2f9a70895bbbfbdad7196abd952e7b01d45027
+  RNPermissions: f61ebf52bb670809d522bba0b09b3e6a9ea5ab7e
   RNScreens: 30249f9331c3b00ae7cb7922e11f58b3ed369c07
   RNVectorIcons: 7ac7aaa83f8f3d4c7c0f7daea5a431e91a29b0cd
   SocketRocket: abac6f5de4d4d62d24e11868d7a2f427e0ef940d
   TcpSockets: 14306fb79f9750ea7d2ddd02d8bed182abb01797
   Yoga: dafebc41bc66910af33077aaa41078e89fd635bf
 
-PODFILE CHECKSUM: 65cc61e378f50f3c8885722015c5d12b406e4f4c
+PODFILE CHECKSUM: 900189894353af0d4cbfd49258b9aaf071935695
 
 COCOAPODS: 1.15.2
