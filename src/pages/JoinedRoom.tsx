@@ -166,27 +166,29 @@ const JoinedRoomPage: React.FC<JoinedRoomProps> = ({ route }) => {
                     {room?.title}
                 </Text>
             </View>
-            <ScrollView style={{marginTop: 95}}>
-              <Text> {room?.description} </Text>
-              {loading ? ( <ActivityIndicator size="large" color="#0000ff" /> ) : (
-                videoUrls.map((url, index) => (
-                  <View key={url}>
-                    <Video
-                      source={{ uri: url }}
-                      style={styles.video}
-                      controls={true}
-                      resizeMode="contain"
-                    />
-                    <TouchableOpacity 
-                      onPress={() => toggleComments(videos[index].videoId)}
-                      style={styles.toggleCommentsBox}
-                    >
-                      <Text style={{color: 'white'}}> Comments </Text>
-                    </TouchableOpacity>
-                  </View>
-                ))
-              )}
-            </ScrollView>
+            <View style={{paddingTop: 95, flex: 1}}>
+              <ScrollView  style={{flex: 1}} contentContainerStyle={{ paddingBottom: 600 }}>
+                <Text> {room?.description} </Text>
+                {loading ? ( <ActivityIndicator size="large" color="#0000ff" /> ) : (
+                  videoUrls.map((url, index) => (
+                    <View key={url}>
+                      <Video
+                        source={{ uri: url }}
+                        style={styles.video}
+                        controls={true}
+                        resizeMode="contain"
+                      />
+                      <TouchableOpacity 
+                        onPress={() => toggleComments(videos[index].videoId)}
+                        style={styles.toggleCommentsBox}
+                      >
+                        <Text style={{color: 'white'}}> Comments </Text>
+                      </TouchableOpacity>
+                    </View>
+                  ))
+                )}
+              </ScrollView>
+            </View>
             <Modal
                 isVisible={commentsVisible} 
                 animationIn="slideInUp" 
