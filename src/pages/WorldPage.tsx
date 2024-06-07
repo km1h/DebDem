@@ -106,7 +106,6 @@ const WorldPage: React.FC = () => {
         </TouchableOpacity>
       </View>
       <ScrollView style={styles.scrollContainer}>
-
         {questions.map((question, index) => (
           <View style={styles.postContatiner} key={question.questionId}>
             <LinearGradient
@@ -130,7 +129,6 @@ const WorldPage: React.FC = () => {
             </View>
           </View>
         ))}
-
       </ScrollView>
       <KeyboardAvoidingView
         behavior="padding"
@@ -180,7 +178,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between'
   },
   scrollContainer: {
-    marginTop: 30,
+    marginTop: 80
   },
   postContatiner: {
     height: 60,
