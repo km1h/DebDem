@@ -34,7 +34,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ navigation }) => {
   const onAuthStateChanged = (user: any) => {
     if (user) {
       globalThis.userId = user.uid;
-      navigation.navigate('WorldPage');
+      navigation.navigate('NormsPage');
     }
   };
 

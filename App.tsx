@@ -9,6 +9,7 @@ import ProfilePage from './src/pages/ProfilePage';
 import LoginPage from './src/pages/LoginPage';
 import JoinedRoomPage from './src/pages/JoinedRoom';
 import InvitesPage from './src/pages/InvitesPage';
+import LoginPage from './src/pages/LoginPage.tsx';
 import NotJoinedRoomPage from './src/pages/NotJoinedRoom';
 import NavBar from './src/components/NavBar';
 import { RootStackParamList } from './src/components/NavigationTypes';
@@ -34,6 +35,7 @@ function App(): React.JSX.Element {
       <Stack.Screen name="LoginPage" component={LoginPage} options={{ headerShown: false}}/>
       <Stack.Screen name="JoinedRoomPage" component={JoinedRoomPage} options={{ headerShown: false}}/>
       <Stack.Screen name="InvitesPage" component={InvitesPage} options={{ headerShown: false}}/>
+      <Stack.Screen name="NormsPage" component={NormsPage} options={{ headerShown: false}}/>
       <Stack.Screen name="NotJoinedRoomPage" component={NotJoinedRoomPage} options={{ headerShown: false}}/>
     </Stack.Navigator>
   </NavigationContainer>
