@@ -23,11 +23,25 @@ Navigating News Narratives: A Media Bias Analysis Dataset,
 Raza, Shaina, arXiv preprint arXiv:2312.00168, 2023
 """
 def flag_bias (transcript_id):
-  from datasets import load_dataset
-  from transformers import pipeline
+  import torch
+  from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
-  print ("Loading the Data")
+  text = load_transcript (transcript_id)
 
-  dataset = load_dataset("newsmediabias/news-bias-full-data")
-  print(dataset["train"][0]) 
-  # Working on this in a notebook
+  model = AutoModelForSequenceClassification.from_pretrained("distilbert-base-uncased")
+  model.load_state_dict(torch.load("model_epoch_2.pt"))
+  tokenizer = AutoTokenizer.from_pretrained("distilbert-base-uncased")
+
+  device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+  model.to(device)
+
+  model.eval()
+  encoded_text = tokenizer(text, return_tensors="pt", padding=True, truncation=True, max_length=256).to(device)
+  with torch.no_grad():
+      output = model(**encoded_text)
+      prediction = torch.argmax(output.logits, dim=1)
+  
+  return predict(text)
+  
+
+  
