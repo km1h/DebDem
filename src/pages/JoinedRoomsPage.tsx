@@ -1,27 +1,59 @@
 import React, { useState, useEffect, } from 'react';
 import {ScrollView, Text, StyleSheet, View, TouchableOpacity} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
-import joinedRoomsData from '../data/joinedRooms.json';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../components/NavigationTypes';
+
+import firestore from '@react-native-firebase/firestore';
+
+import { fetchAllRooms } from '../database/Fetch';
+import { Room } from '../database/Structures';
+import { ROOM_COLLECTION } from '../database/Constants';
 
 type JoinedRoomsPageNavigationProp = NavigationProp<RootStackParamList, 'JoinedRoomsPage'>;
 
 
 const RoomsPage: React.FC = () => {
-  const [joinedRooms] = useState(joinedRoomsData.rooms);
+  const [joinedRooms, setJoinedRooms] = useState<Room[]>([]);
+  const [time, setTime] = useState<number>(0);
 
   const navigation = useNavigation<JoinedRoomsPageNavigationProp>();
 
-  const handleRoomPress = (roomId: number, roomContent: string) => {
+  const handleRoomPress = (roomId: string) => {
     navigation.navigate('JoinedRoomPage', {
       data: {
-        roomId: roomId,
-        roomContent: roomContent
+        roomId: roomId
       }
     })
   }
 
+  useEffect(() => {
+    let myUserId = globalThis.userId;
+    fetchAllRooms().then(rooms => {
+      setJoinedRooms(rooms.filter(room => room.userIds.includes(myUserId)));
+    });
+  }, []);
+
+  useEffect(() => {
+    firestore().collection(ROOM_COLLECTION).onSnapshot(snapshot => {
+      let joinedRooms = snapshot.docs.map(doc => doc.data() as Room).filter(room => room.userIds.includes(globalThis.userId));
+      setJoinedRooms(joinedRooms);
+    });
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTime(Date.now());
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const countdown = (timeInitialized: number) => {
+    let date = new Date(timeInitialized + 1000*60*60*24*7 - time);
+    return date.toUTCString().split(' ')[4];
+  }
+  
   return (
     <View style={styles.container}>
       <View style={styles.titleBox}>
@@ -31,17 +63,17 @@ const RoomsPage: React.FC = () => {
       </View>
       <ScrollView style={styles.scrollContainter}>
 
-      {joinedRooms.map((room, index) => (
-          <TouchableOpacity style={styles.roomContainer} key={room.id} onPress={() => handleRoomPress(room.id, room.content)}>
+      {joinedRooms.map((room) => (
+          <TouchableOpacity style={styles.roomContainer} key={room.roomId} onPress={() => handleRoomPress(room.roomId)}>
               <LinearGradient
                 colors={['rgba(239, 198, 155, 0.60)', 'rgba(119, 156, 171, 0.10)', 'rgba(0, 0, 0, 0)']}
                 style={{height: 100, borderRadius: 10, width: '100%', justifyContent: 'space-between'}}
               >
                 <Text style={styles.roomText}>
-                  {room.content}
+                  {room.title}
                 </Text>
                 <Text style={styles.timerText}>
-                  Time Remaining: {room.time}
+                  Time Remaining: {countdown(room.timeInitialized)}
                 </Text>
               </LinearGradient>
 

@@ -1,11 +1,18 @@
 import React, { useState, useEffect, } from 'react';
-import {ScrollView, Text, StyleSheet, View, TouchableOpacity, Image, TextInput} from 'react-native';
-import LinearGradient from 'react-native-linear-gradient';
+import {ScrollView, Text, StyleSheet, View, TouchableOpacity, ActivityIndicator, TextInput, KeyboardAvoidingView} from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import roomsData from '../data/joinedRooms.json'
 import { RootStackParamList } from '../components/NavigationTypes';
 import { RouteProp, useNavigation, NavigationProp } from '@react-navigation/native';
 import Modal from 'react-native-modal';
+import Video from 'react-native-video';
+
+import firestore from '@react-native-firebase/firestore';
+
+import { fetchVideosFromRoom, fetchVideoDownloadURLs, fetchCommentsFromVideo, fetchRoom, fetchUser } from '../database/Fetch';
+import { Video as VideoStruct, Comment, Room, User } from '../database/Structures';
+import { getRandomId, postComment } from '../database/Post';
+import { VIDEO_COLLECTION } from '../database/Constants';
+
 
 type JoinedRoomRouteProp = RouteProp<RootStackParamList, 'JoinedRoomPage'>;
 type JoinedRoomNavigationProp = NavigationProp<RootStackParamList, 'JoinedRoomPage'>;
@@ -15,18 +22,139 @@ interface JoinedRoomProps {
 }
 
 const JoinedRoomPage: React.FC<JoinedRoomProps> = ({ route }) => {
-    const roomId = route.params.data.roomId // for future use when pulling room specific data from backend
-    const roomContent = route.params.data.roomContent
-    const [commentsVisible, setCommentsVisible] = useState(false);
+    const roomId = route.params.data.roomId
+    const [room, setRoom] = useState<Room>()
     const navigation = useNavigation<JoinedRoomNavigationProp>();
+
+    const [commentsVisible, setCommentsVisible] = useState(false);
+    const [commentVideoId, setCommentVideoId] = useState<string>();
+    const [comments, setComments] = useState<Comment[]>([]);
+    const [haveComments, setHaveComments] = useState(false);
+    const [madeComment, setMadeComment] = useState<string>();
+
+    const [videos, setVideos] = useState<VideoStruct[]>([]);
+    const [videoUrls, setVideoUrls] = useState<string[]>([]);
+    const [loading, setLoading] = useState<boolean>(true);
+
+    useEffect(() => {
+        const fetchVideos = async () => {
+          try {
+            const videos = await fetchVideosFromRoom(roomId);
+            console.log("retrieved videos")
+            console.log(videos);
+
+            if (!videos) {
+              console.error('No video paths found');
+              setVideoUrls([]);
+              setLoading(false);
+              return;
+            }
+
+            const urls = await fetchVideoDownloadURLs(videos);
+            setVideoUrls(urls);
+            setVideos(videos);
+            setLoading(false);
+          } catch (error) {
+            console.error(error);
+            setLoading(false);
+          }
+        };
+
+        const getRoomData = async () => {
+          try {
+            const data = await fetchRoom(roomId);
+            console.log(data);
+  
+            if (!data) {
+              console.error('No room found');
+              return;
+            }
+  
+            setRoom(data);
+  
+          } catch (error) {
+            console.error(error);
+          }
+        };
+
+        getRoomData();
+        fetchVideos();
+    }, [roomId]);
+
+    // update comments
+    useEffect(() => {
+      firestore().collection(VIDEO_COLLECTION).onSnapshot(snapshot => {
+        console.log('Video collection updated');
+        if (!commentVideoId) return;
+        console.log('Updating comments for video: ', commentVideoId);
+        let updatedVideo = snapshot.docs.map(doc => doc.data() as VideoStruct).find(video => video.videoId === commentVideoId);
+        console.log('Updated video: ', updatedVideo);
+        if (!updatedVideo) {
+          return;
+        }
+        console.log('Fetching comments for video: ', updatedVideo.videoId)
+        fetchCommentsFromVideo(updatedVideo.videoId).then(async (comments) => {
+          updateCommentUser(comments);
+        });
+      });
+
+      const updateCommentUser = async (comments : Comment[]) => {
+        setComments(await Promise.all(comments.map(async (comment) => {
+          let user = await fetchUser(comment.userId);
+          let updatedComment = comment;
+          updatedComment.firstName = user.firstName;
+          updatedComment.lastName = user.lastName;
+          return updatedComment;
+        })));
+      }
+
+    }, [commentVideoId]);
 
     const handleGoBack = () => {
         navigation.goBack();
     };
 
-    const toggleComments = () => {
+
+
+    const toggleComments = (videoId?: string) => {
+      console.log('Toggling comments for video: ', videoId);
         setCommentsVisible(!commentsVisible)
-    }
+        console.log('Comments visible: ', commentsVisible)
+        
+        if (videoId) {
+          const getComments = async () => {
+            try {
+              console.log('Fetching comments for video: ', videoId)
+              const comments_data = await fetchCommentsFromVideo(videoId);
+              console.log('Comments for video: ', comments_data);
+              setComments(comments_data);
+              console.log('Comments: ', comments);
+              setCommentVideoId(videoId);
+              console.log('Comment video id: ', commentVideoId);
+              setHaveComments(true);
+            } catch(error) {
+              console.error(error);
+              setHaveComments(false);
+            }
+          }
+          getComments();
+        } else {
+          setHaveComments(false); // assumed that if no param is passed in, the comments are being toggled OFF - thus clearing that we have comments
+        }
+    };
+
+    const sendComment = (videoId?: string) => {
+      if (!videoId) return;
+      
+      let newComment : Comment = {
+        commentId: getRandomId(),
+        content: madeComment,
+        userId: globalThis.userId,
+        timePosted: Date.now(),
+      }
+
+      postComment(newComment, videoId);
+    };
 
     return (
         <View style={styles.container}>
@@ -35,42 +163,32 @@ const JoinedRoomPage: React.FC<JoinedRoomProps> = ({ route }) => {
                     <Ionicons name='arrow-back-outline' size={30}/>
                 </TouchableOpacity>
                 <Text style={styles.titleText}>
-                    {roomContent}
+                    {room?.title}
                 </Text>
             </View>
-            <ScrollView style={{marginTop: 95}}>
-                <Text> Room Description </Text>
-                <View style={styles.videosContainer}>
-                    <TouchableOpacity onPress={() => toggleComments()}>
-                        <Image 
-                            source={require('../img/user1.jpeg')} 
-                            style={styles.video} 
-                            resizeMode="cover"
-                        />
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => toggleComments()}>
-                        <Image 
-                            source={require('../img/user2.jpeg')} 
-                            style={styles.video} 
-                            resizeMode="cover"
-                        />
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => toggleComments()}>
-                        <Image 
-                            source={require('../img/user3.jpeg')} 
-                            style={styles.video} 
-                            resizeMode="cover"
-                        />
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => toggleComments()}>
-                        <Image 
-                            source={require('../img/user4.jpeg')} 
-                            style={styles.video} 
-                            resizeMode="cover"
-                        />
-                    </TouchableOpacity>
-                </View>
-            </ScrollView >
+            <View style={{marginTop: 95, flex: 1}}>
+              <ScrollView  style={{flex: 1}} contentContainerStyle={{ paddingBottom: 600 }}>
+                <Text> {room?.description} </Text>
+                {loading ? ( <ActivityIndicator size="large" color="#0000ff" /> ) : (
+                  videoUrls.map((url, index) => (
+                    <View key={url}>
+                      <Video
+                        source={{ uri: url }}
+                        style={styles.video}
+                        controls={true}
+                        resizeMode="contain"
+                      />
+                      <TouchableOpacity 
+                        onPress={() => toggleComments(videos[index].videoId)}
+                        style={styles.toggleCommentsBox}
+                      >
+                        <Text style={{color: 'white'}}> Comments </Text>
+                      </TouchableOpacity>
+                    </View>
+                  ))
+                )}
+              </ScrollView>
+            </View>
             <Modal
                 isVisible={commentsVisible} 
                 animationIn="slideInUp" 
@@ -85,19 +203,41 @@ const JoinedRoomPage: React.FC<JoinedRoomProps> = ({ route }) => {
                             <Text style={{marginTop: 10, fontSize: 30, marginRight: 5}} > X </Text>
                         </TouchableOpacity>
                     </View>
-                    <ScrollView>
+                      <ScrollView>
                         <View> 
+                          {haveComments ?
+                            comments.map((comment, index) =>(
+                              
+                              <View key={comment.commentId} style={styles.commentContainer}>
+                                <Text style={{marginRight: 10, marginLeft: 5}}>{comment.firstName}:</Text>
+                                <Text>{comment.content}</Text>
+                              </View>
+                            ))
+                          : 
                             <Text style={{marginTop: 10, marginLeft: 5}}> Empty for now </Text>
+                          }
                         </View>
-                    </ScrollView>
-                    <View style={styles.makeCommentContainer}>
-                        <TextInput style={styles.input}
-                            placeholder="Join the discussion"
-                        />
-                        <TouchableOpacity>
-                            <Text style={{marginRight: 10, marginTop: 5}}> Send </Text>
-                        </TouchableOpacity>
-                    </View>
+                      </ScrollView>
+                    <KeyboardAvoidingView
+                     behavior="padding"
+                     style={{flex: 1}}
+                    >
+                      <View style={styles.makeCommentContainer}>
+                          <TextInput style={styles.input}
+                              placeholder="Join the discussion"
+                              onChangeText={(text) => {
+                                setMadeComment(text);
+                              }}
+                          />
+                          <TouchableOpacity 
+                            onPress={() => sendComment(commentVideoId)}
+                            style={styles.sendCommentButton}
+                          >
+                              <Text style={{marginRight: 10, marginTop: 7, alignSelf: 'center'}}> Send </Text>
+                          </TouchableOpacity>
+                      </View>
+                    </KeyboardAvoidingView>
+
                 </View>
             </Modal>
         </View>
@@ -155,6 +295,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between'
   },
+  commentContainer: {
+    width: '80%',
+    marginBottom: 10,
+    marginTop: 5,
+    flexDirection: 'row'
+  },
   input: {
     height: 30,
     width: '70%',
@@ -162,6 +308,22 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginBottom: 10,
     marginLeft: 10,
+  },
+  sendCommentButton: {
+    borderRadius: 10,
+    backgroundColor: 'rgb(75, 78, 109)',
+    height: 30,
+    width: 50,
+    marginRight: 10
+  },
+  toggleCommentsBox: {
+    backgroundColor: 'rgb(75, 78, 109)',
+    borderRadius: 10,
+    width: '25%',
+    justifyContent: 'center',
+    alignItems:'center',
+    height: '7%',
+    marginLeft: 8
   }
 });
 

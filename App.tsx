@@ -14,6 +14,10 @@ import NavBar from './src/components/NavBar';
 import { RootStackParamList } from './src/components/NavigationTypes';
 import { LogBox } from "react-native"
 
+declare global {
+  var userId: string;
+}
+
 const Stack = createNativeStackNavigator<RootStackParamList>();
 LogBox.ignoreAllLogs(true);
 

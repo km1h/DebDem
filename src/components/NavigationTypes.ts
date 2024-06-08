@@ -4,13 +4,11 @@ export type RootStackParamList = {
     JoinedRoomsPage: undefined,
     ProfilePage: undefined,
     JoinedRoomPage: { data: { 
-      roomId: number; 
-      roomContent: string;
+      roomId: string; 
     }; },
 
     InvitesPage: undefined,
     NotJoinedRoomPage: { data: { 
-      roomId: number; 
-      roomContent: string;
+      roomId: string; 
     }; },
   };
