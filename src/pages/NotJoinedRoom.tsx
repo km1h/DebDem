@@ -84,11 +84,11 @@ const NotJoinedRoomPage: React.FC<NotJoinedRoomProps> = ({ route }) => {
                     <Ionicons name='arrow-back-outline' size={30}/>
                 </TouchableOpacity>
                 <Text style={styles.titleText}>
-                    {room.title}
+                    {room?.title}
                 </Text>
             </View>
             <ScrollView style={{marginTop: 95}}>
-               <Text>{room.description}</Text>
+               <Text>{room?.description}</Text>
             </ScrollView >
             <TouchableOpacity style={styles.uploadButton} onPress={recordVideo}>
                 <Text>Record</Text>
